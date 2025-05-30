@@ -21,7 +21,7 @@ export default function ContactPage() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">For general inquiries & support:</p>
-            <a href="mailto:support@rxpirationalert.com" className="text-primary hover:underline">support@rxpirationalert.com</a>
+            <a href="mailto:admin@appsorwebs.com" className="text-primary hover:underline">admin@appsorwebs.com</a>
           </CardContent>
         </Card>
         <Card className="text-center">
