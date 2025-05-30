@@ -1,9 +1,9 @@
 
 "use client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { BarChart, LineChart, PieChart, Package, Clock, Users, AlertTriangle } from "lucide-react";
+import { Package, Clock, Users, AlertTriangle } from "lucide-react"; // Corrected: Removed BarChart, LineChart, PieChart
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
-import { Bar, Line, Pie, Cell, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend as RechartsLegend } from "recharts";
+import { BarChart, LineChart, PieChart, Bar, Line, Pie, Cell, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend as RechartsLegend } from "recharts"; // Corrected: Added BarChart, LineChart, PieChart
 
 const expiringDrugsData = [
   { name: "Next 30 Days", count: 15, fill: "hsl(var(--chart-1))" },
