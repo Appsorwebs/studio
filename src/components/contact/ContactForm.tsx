@@ -1,27 +1,79 @@
 
 "use client";
 
+import { useState, FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Send, User, Mail, MessageSquare } from "lucide-react";
+import { Send, User, Mail, MessageSquare, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { FormEvent } from "react";
 
 export function ContactForm() {
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [subject, setSubject] = useState("");
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // In a real app, you would handle form submission here (e.g., send data to an API)
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for contacting us. We'll get back to you soon.",
-    });
-    (event.target as HTMLFormElement).reset();
+    setIsLoading(true);
+
+    const formData = new FormData(event.currentTarget);
+    const data = {
+      name: formData.get("name") as string,
+      email: formData.get("email") as string,
+      subject: formData.get("subject") as string, // This is now handled by the Select component's value
+      message: formData.get("message") as string,
+    };
+
+    if (!data.subject) {
+      toast({
+        title: "Inquiry Type Missing",
+        description: "Please select an inquiry type.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Message Sent!",
+          description: result.message || "Thank you for contacting us. We'll get back to you soon.",
+          variant: "default",
+        });
+        (event.target as HTMLFormElement).reset();
+        setSubject(""); // Reset subject state for the Select component
+      } else {
+        toast({
+          title: "Error Sending Message",
+          description: result.message || "Something went wrong. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Network Error",
+        description: "Could not reach the server. Please check your connection and try again.",
+        variant: "destructive",
+      });
+      console.error("Contact form submission error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -50,7 +102,7 @@ export function ContactForm() {
           </div>
           <div>
             <Label htmlFor="subject">Subject / Inquiry Type</Label>
-             <Select name="subject" required>
+             <Select name="subject" required value={subject} onValueChange={setSubject}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select an inquiry type" />
                 </SelectTrigger>
@@ -77,8 +129,13 @@ export function ContactForm() {
                 />
             </div>
           </div>
-          <Button type="submit" className="w-full">
-            <Send className="mr-2 h-4 w-4" /> Send Message
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="mr-2 h-4 w-4" />
+            )}
+            Send Message
           </Button>
         </form>
       </CardContent>
