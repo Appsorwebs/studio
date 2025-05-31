@@ -93,7 +93,7 @@ export default function LandingPage() {
               <Image 
                 src="https://placehold.co/1200x600.png" 
                 alt="Rxpiration Alert Dashboard Mockup"
-                data-ai-hint="dashboard mockup" 
+                data-ai-hint="intuitive workflow" 
                 width={1200} 
                 height={600} 
                 className="rounded-xl shadow-2xl mx-auto"
