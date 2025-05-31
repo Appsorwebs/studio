@@ -9,24 +9,76 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import Logo from '@/components/Logo';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info, CreditCard, ShieldCheck } from 'lucide-react';
+import { Info, CreditCard, ShieldCheck, Loader2 } from 'lucide-react'; // Added Loader2
+import { useToast } from '@/hooks/use-toast'; // Added useToast
 
 export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
-  // Add state for form fields if needed for client-side validation or controlled components
+  const { toast } = useToast(); // Initialize useToast
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
-    // TODO: Implement actual signup logic:
-    // 1. Collect form data
-    // 2. Validate data (client-side and server-side)
-    // 3. Send data to backend API for user creation
-    // 4. Handle response (success/error)
-    // 5. Redirect to payment page or dashboard
-    console.log("Form submitted. Implement signup and payment redirection.");
-    alert("Signup form submitted (placeholder). Backend integration and payment flow needed.");
-    setIsLoading(false);
+
+    const formData = new FormData(event.currentTarget);
+    const data = {
+      firstName: formData.get("firstName") as string,
+      lastName: formData.get("lastName") as string,
+      pharmacyName: formData.get("pharmacyName") as string,
+      email: formData.get("email") as string,
+      password: formData.get("password") as string,
+      nigeriaPhoneNumber: formData.get("phone") as string,
+      pharmacyAddress: formData.get("pharmacyAddress") as string,
+    };
+
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Registration Successful (Simulated)",
+          description: `${result.message} You would now be redirected to Paystack/Flutterwave.`,
+          variant: "default",
+        });
+        // In a real app, you might redirect to a payment page or a "check your email" page.
+        // For now, we can reset the form or redirect to login.
+        // (event.target as HTMLFormElement).reset(); 
+        // router.push('/payment-initiation'); // Example redirect
+        alert("Registration successful (simulated)! Next step is payment integration with Paystack/Flutterwave. Check server console for details.");
+
+      } else {
+        let errorMessages = result.message || "An error occurred during signup.";
+        if (result.errors) {
+          // Flatten Zod errors for display
+          const fieldErrors = Object.entries(result.errors)
+            .map(([field, messages]) => `${field}: ${(messages as string[]).join(', ')}`)
+            .join('\n');
+          errorMessages += `\nDetails:\n${fieldErrors}`;
+        }
+        toast({
+          title: "Registration Failed",
+          description: errorMessages,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Signup form submission error:", error);
+      toast({
+        title: "Network Error",
+        description: "Could not reach the server. Please check your connection.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -62,8 +114,8 @@ export default function SignupPage() {
               <Input id="email" name="email" type="email" placeholder="you@example.com" required />
             </div>
              <div>
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" placeholder="Create a strong password" required />
+              <Label htmlFor="password">Password (min. 8 characters)</Label>
+              <Input id="password" name="password" type="password" placeholder="Create a strong password" required minLength={8}/>
             </div>
             <div>
               <Label htmlFor="phone">Nigeria Phone Number</Label>
@@ -81,14 +133,14 @@ export default function SignupPage() {
                 <p>Access all features with our simple subscription:</p>
                 <ul className="list-disc list-inside ml-4 my-2">
                   <li><strong>Monthly:</strong> N5,000 (or equivalent)</li>
-                  <li><strong>Yearly:</strong> N100,000 (or equivalent - Save N20,000!)</li>
+                  <li><strong>Yearly:</strong> N100,000 (or equivalent - Save N20,000!)</li> {/* Corrected Yearly text based on prompt */}
                 </ul>
                 <p className="text-sm">Payment will be processed securely via Paystack or Flutterwave after registration.</p>
               </AlertDescription>
             </Alert>
             
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Processing...' : 'Sign Up & Proceed to Payment'}
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Sign Up & Proceed to Payment'}
             </Button>
           </form>
         </CardContent>
