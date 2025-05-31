@@ -12,17 +12,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { SidebarTrigger } from '@/components/ui/sidebar'; // Import SidebarTrigger
+import { SidebarTrigger } from '@/components/ui/sidebar'; 
 
 export function AppHeader() {
   return (
     <header className="sticky top-0 z-20 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-2">
-          <div className="md:hidden"> {/* Show trigger only on mobile */}
-            <SidebarTrigger />
-          </div>
-          <Link href="/dashboard" className="flex items-center">
+          {/* SidebarTrigger is now always visible */}
+          <SidebarTrigger /> 
+          <Link href="/dashboard" className="flex items-center ml-2"> {/* Added ml-2 for spacing */}
             <Logo />
           </Link>
         </div>
@@ -59,3 +58,5 @@ export function AppHeader() {
     </header>
   );
 }
+
+    
