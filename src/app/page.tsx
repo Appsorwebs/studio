@@ -20,7 +20,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-4">
             <ThemeToggle />
             <Button asChild variant="outline">
-              <Link href="/dashboard">Login / Sign Up</Link>
+              <Link href="/signup">Login / Sign Up</Link>
             </Button>
           </div>
         </div>
@@ -41,7 +41,7 @@ export default function LandingPage() {
             </p>
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
               <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
-                <Link href="/dashboard">
+                <Link href="/signup">
                   Get Started <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
@@ -117,7 +117,7 @@ export default function LandingPage() {
               Join Rxpiration Alert today and be part of a sustainable solution for pharmaceutical management.
             </p>
             <Button asChild size="lg" variant="secondary" className="bg-background text-primary hover:bg-background/90 shadow-lg">
-              <Link href="/dashboard">
+              <Link href="/signup">
                 Sign Up for Free <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>

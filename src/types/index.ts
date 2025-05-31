@@ -42,3 +42,22 @@ export interface PredictionResult {
   confidenceLevel: string; // e.g., High, Moderate, Low
   reasoning: string;
 }
+
+export interface PharmacistProfile {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string; // Ensure this is unique
+  pharmacyName: string; // Will serve as username, ensure unique
+  nigeriaPhoneNumber: string;
+  pharmacyAddress: string;
+  profilePictureUrl?: string;
+  socialMediaLinks?: (string | undefined)[]; // Array of up to 5 links
+  websiteLink?: string;
+  subscriptionStatus: 'active' | 'inactive' | 'pending_payment' | 'cancelled' | 'trial';
+  subscriptionTier: 'monthly' | 'yearly' | 'none';
+  subscriptionId?: string; // From Paystack/Flutterwave
+  nextBillingDate?: string; // ISO string or Date
+  memberSince: string; // ISO string or Date
+  // Potentially other fields like pharmacist registration number, verification status etc.
+}
