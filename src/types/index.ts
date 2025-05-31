@@ -25,6 +25,7 @@ export interface Charity {
   website?: string;
   description: string;
   status: 'Active' | 'Inactive'; // Or other relevant statuses
+  neededItems?: string[];
 }
 
 export interface PredictionRequest {

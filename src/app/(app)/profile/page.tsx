@@ -36,7 +36,7 @@ export default function ProfilePage() {
           </div>
           
           <div className="text-center pt-4 mt-6 border-t">
-            <p className="text-lg font-semibold text-amber-600 dark:text-amber-400">
+            <p className="text-lg font-semibold text-accent">
               This Page is Under Construction
             </p>
             <p className="mt-1 text-sm text-muted-foreground">

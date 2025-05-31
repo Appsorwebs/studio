@@ -126,7 +126,7 @@ export function DonationsPageContent() {
                   <CardHeader>
                     <div className="flex items-center justify-between">
                        <CardTitle className="text-lg">{charity.name}</CardTitle>
-                       <Badge variant={charity.status === "Active" ? "default" : "secondary"} className={charity.status === "Active" ? "bg-green-500 hover:bg-green-600" : ""}>{charity.status}</Badge>
+                       <Badge variant={charity.status === "Active" ? "default" : "secondary"}>{charity.status}</Badge>
                     </div>
                     <CardDescription>{charity.address}</CardDescription>
                   </CardHeader>

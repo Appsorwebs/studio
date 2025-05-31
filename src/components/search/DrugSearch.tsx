@@ -58,12 +58,12 @@ export function DrugSearch() {
     return results.filter(drug => drug.status === "Available" || drug.status === "Donated"); // Only show available or donated
   }, [searchTerm, categoryFilter, expirationFilter]);
   
-  const getDaysToExpireText = (expirationDate: string) => {
+  const getDaysToExpireElement = (expirationDate: string) => {
     const days = differenceInDays(parseISO(expirationDate), new Date());
     if (days < 0) return <Badge variant="destructive">Expired</Badge>;
-    if (days <= 7) return <Badge variant="destructive" className="bg-orange-500 hover:bg-orange-600">{days} days left</Badge>;
-    if (days <= 30) return <Badge variant="secondary" className="bg-yellow-500 hover:bg-yellow-600 text-black">{days} days left</Badge>;
-    return format(parseISO(expirationDate), "MMM dd, yyyy");
+    if (days <= 7) return <Badge variant="destructive">{days} days left</Badge>;
+    if (days <= 30) return <Badge variant="secondary">{days} days left</Badge>;
+    return <span>{format(parseISO(expirationDate), "MMM dd, yyyy")}</span>;
   };
 
 
@@ -129,7 +129,7 @@ export function DrugSearch() {
                   <Package className="mr-2 h-4 w-4" /> Category: {drug.category || "N/A"}
                 </div>
                 <div className="flex items-center text-sm text-muted-foreground">
-                   <CalendarClock className="mr-2 h-4 w-4" /> Expires: {getDaysToExpireText(drug.expirationDate)}
+                   <CalendarClock className="mr-2 h-4 w-4" /> Expires: {getDaysToExpireElement(drug.expirationDate)}
                 </div>
                 <div className="flex items-center text-sm text-muted-foreground">
                    <BriefcaseMedical className="mr-2 h-4 w-4" /> Quantity: {drug.quantity ?? 'N/A'}
