@@ -31,7 +31,7 @@ export default function ContactPage() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">Our support line is open Mon-Fri, 9am-5pm EST:</p>
-            <a href="tel:+15551234567" className="text-primary hover:underline">+1 (555) 123-4567</a>
+            <a href="tel:+2348090775252" className="text-primary hover:underline">+234 809 077 5252</a>
           </CardContent>
         </Card>
         <Card className="text-center">
