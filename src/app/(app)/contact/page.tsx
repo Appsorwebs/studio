@@ -41,7 +41,7 @@ export default function ContactPage() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">Rxpiration Alert HQ</p>
-            <p>123 Innovation Drive, Tech City, TX 75001</p>
+            <p>Suit C33 Danziyal Plaza, Central Business Area, Abuja.</p>
           </CardContent>
         </Card>
       </div>
