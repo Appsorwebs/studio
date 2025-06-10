@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from '@/hooks/use-toast';
 
-// Placeholder data - in a real app, this would come from user state/backend
+// Placeholder data - in a real app, this would come from user state/backend after login
 const initialPharmacistProfile = {
   firstName: "Jane",
   lastName: "Doe",
@@ -51,17 +51,53 @@ export default function ProfilePage() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
-    console.log("Submitting profile data (simulated):", profileData);
+    
+    // Data to send (excluding fields not meant to be updated or derived like pharmacyName if it's a username)
+    const { memberSince, subscriptionStatus, subscriptionTier, ...dataToUpdate } = profileData;
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      const response = await fetch('/api/profile/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dataToUpdate), 
+      });
 
-    setIsLoading(false);
-    toast({
-      title: "Profile Updated (Simulated)",
-      description: "Your profile changes have been saved.",
-      variant: "default",
-    });
+      const result = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Profile Updated",
+          description: result.message || "Your profile changes have been saved (simulated).",
+          variant: "default",
+        });
+        // Optionally update profileData if the backend returns the full updated object
+        // setProfileData(prev => ({ ...prev, ...result.updatedData }));
+      } else {
+        let errorMessages = result.message || "An error occurred while updating your profile.";
+        if (result.errors) {
+          const fieldErrors = Object.entries(result.errors)
+            .map(([field, messages]) => `${field}: ${(messages as string[]).join(', ')}`)
+            .join('\n');
+          errorMessages += `\nDetails:\n${fieldErrors}`;
+        }
+        toast({
+          title: "Update Failed",
+          description: errorMessages,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Profile update submission error:", error);
+      toast({
+        title: "Network Error",
+        description: "Could not reach the server. Please check your connection.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   const handleManageSubscription = () => {
@@ -91,7 +127,7 @@ export default function ProfilePage() {
                 <div>
                   <Label htmlFor="pharmacyName">Pharmacy Name (Username)</Label>
                   <Input id="pharmacyName" name="pharmacyName" value={profileData.pharmacyName} readOnly className="bg-muted/50" />
-                  <p className="text-xs text-muted-foreground mt-1">Username (Pharmacy Name) cannot be changed.</p>
+                  <p className="text-xs text-muted-foreground mt-1">Username (Pharmacy Name) cannot be changed here.</p>
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
@@ -194,11 +230,11 @@ export default function ProfilePage() {
           </div>
           
           <div className="text-center pt-4 mt-6 border-t">
-            <p className="text-md font-semibold text-accent">
+            <p className="text-md font-semibold text-accent-foreground">
               Profile UI is Interactive
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              You can now edit your profile information. Saving changes is currently simulated. Full backend integration for profile updates is under development.
+              You can edit your profile information. Saving changes is now (simulated) via a backend API call. Full database persistence is the next step.
             </p>
           </div>
         </CardContent>
@@ -206,5 +242,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    
