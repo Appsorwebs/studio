@@ -9,12 +9,12 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import Logo from '@/components/Logo';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info, CreditCard, ShieldCheck, Loader2 } from 'lucide-react'; // Added Loader2
-import { useToast } from '@/hooks/use-toast'; // Added useToast
+import { Info, CreditCard, ShieldCheck, Loader2 } from 'lucide-react'; 
+import { useToast } from '@/hooks/use-toast'; 
 
 export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast(); // Initialize useToast
+  const { toast } = useToast(); 
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -133,7 +133,7 @@ export default function SignupPage() {
                 <p>Access all features with our simple subscription:</p>
                 <ul className="list-disc list-inside ml-4 my-2">
                   <li><strong>Monthly:</strong> N5,000 (or equivalent)</li>
-                  <li><strong>Yearly:</strong> N100,000 (or equivalent - Save N20,000!)</li> {/* Corrected Yearly text based on prompt */}
+                  <li><strong>Yearly:</strong> N100,000 (or equivalent)</li>
                 </ul>
                 <p className="text-sm">Payment will be processed securely via Paystack or Flutterwave after registration.</p>
               </AlertDescription>
