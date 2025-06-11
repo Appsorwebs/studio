@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import Logo from '@/components/Logo';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info, CreditCard, ShieldCheck, Loader2, Sparkles } from 'lucide-react'; 
+import { Loader2, Sparkles } from 'lucide-react'; 
 import { useToast } from '@/hooks/use-toast'; 
 
 export default function SignupPage() {

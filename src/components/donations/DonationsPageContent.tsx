@@ -5,11 +5,8 @@ import type { Charity } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Gift, HeartHandshake, Mail, Phone, Globe, Search } from "lucide-react";
-import Image from "next/image";
+import { HeartHandshake, Mail, Phone, Globe, Search } from "lucide-react";
 import { useState, useMemo } from "react";
 
 const mockCharities: Charity[] = [
@@ -167,30 +164,13 @@ export function DonationsPageContent() {
         </CardContent>
       </Card>
 
-
       <Card>
         <CardHeader>
           <CardTitle>List Your Organization</CardTitle>
-          <CardDescription>If you represent a charity or non-profit that accepts medication donations, please get in touch to be listed.</CardDescription>
+          <CardDescription>If you represent a charity or non-profit that accepts medication donations, please get in touch to be listed (functionality coming soon).</CardDescription>
         </CardHeader>
         <CardContent>
-           <form className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="orgName">Organization Name</Label>
-                <Input id="orgName" name="orgName" />
-              </div>
-              <div>
-                <Label htmlFor="contactEmail">Contact Email</Label>
-                <Input id="contactEmail" name="contactEmail" type="email" />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="message">Message</Label>
-              <Textarea id="message" name="message" placeholder="Tell us about your organization and donation needs."/>
-            </div>
-            <Button type="submit">Submit Application</Button>
-          </form>
+           <p className="text-sm text-muted-foreground">This feature will allow organizations to apply for listing in a future update. For now, please contact us directly via the Contact Us page if you wish to be listed.</p>
         </CardContent>
       </Card>
     </div>

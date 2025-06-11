@@ -2,8 +2,8 @@
 "use client";
 
 import { useState, FormEvent, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { UserCircle, Edit2, Bell, Building, Phone, MapPin, Link as LinkIcon, Globe, ThumbsUp, CreditCard, Loader2, CalendarDays, Star } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { UserCircle, Bell, Building, Phone, Link as LinkIcon, Globe, ThumbsUp, CreditCard, Loader2, Star } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
