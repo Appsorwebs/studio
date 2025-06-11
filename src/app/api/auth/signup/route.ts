@@ -33,27 +33,24 @@ export async function POST(request: NextRequest) {
     // In a real application, you would:
     // 1. Hash the password securely (e.g., using bcrypt).
     // 2. Check if the email or pharmacyName (username) already exists in your database.
-    // 3. Save the new pharmacist user to your database.
+    // 3. Save the new pharmacist user to your database, including a trial start/end date.
     // 4. Potentially create a session or JWT for authentication.
 
     console.log("Received pharmacist signup data:", validation.data);
-    console.log("Simulating password hashing for:", password.substring(0,2) + "..."); // Do not log actual passwords
-    console.log(`Simulating saving user ${pharmacyName} to database...`);
+    console.log("Simulating password hashing for:", password.substring(0,2) + "..."); 
+    console.log(`Simulating saving user ${pharmacyName} to database with a 1-month free trial...`);
 
     // Simulate a delay for database operation
     await new Promise(resolve => setTimeout(resolve, 500));
 
     console.log("User successfully (simulated) created.");
-
     // **MOCK IMPLEMENTATION ENDS HERE**
 
-    // After successful user creation, the next step would typically be to
-    // initiate the payment flow with Paystack or Flutterwave.
-    // This would involve redirecting the user or providing them with payment details.
-    // For this prototype, we'll just return a success message.
+    // After successful user creation (simulated), the user gets a 1-month free trial.
+    // Payment processing would happen later, when the trial is about to expire or if the user chooses to subscribe earlier.
 
     return NextResponse.json({ 
-      message: "Pharmacist registration (simulated) successful! Next step: Payment processing.",
+      message: "Pharmacist registration (simulated) successful! Your 1-month free trial has started.",
       user: { 
         pharmacyName: pharmacyName,
         email: email

@@ -9,12 +9,15 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import Logo from '@/components/Logo';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info, CreditCard, ShieldCheck, Loader2 } from 'lucide-react'; 
+import { Info, CreditCard, ShieldCheck, Loader2, Sparkles } from 'lucide-react'; 
 import { useToast } from '@/hooks/use-toast'; 
 
 export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast(); 
+
+  const paystackMonthlyLink = "https://paystack.shop/pay/rxpiration";
+  const paystackYearlyLink = "https://paystack.shop/pay/rxpiration1";
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -44,20 +47,17 @@ export default function SignupPage() {
 
       if (response.ok) {
         toast({
-          title: "Registration Successful (Simulated)",
-          description: `${result.message} You would now be redirected to Paystack/Flutterwave.`,
+          title: "Registration Successful! 🎉",
+          description: `${result.message} You can now log in and explore the app.`,
           variant: "default",
+          duration: 7000, 
         });
-        // In a real app, you might redirect to a payment page or a "check your email" page.
-        // For now, we can reset the form or redirect to login.
-        // (event.target as HTMLFormElement).reset(); 
-        // router.push('/payment-initiation'); // Example redirect
-        alert("Registration successful (simulated)! Next step is payment integration with Paystack/Flutterwave. Check server console for details.");
-
+        (event.target as HTMLFormElement).reset(); 
+        // In a real app, you might redirect to login or dashboard after a short delay
+        // For now, we just inform the user.
       } else {
         let errorMessages = result.message || "An error occurred during signup.";
         if (result.errors) {
-          // Flatten Zod errors for display
           const fieldErrors = Object.entries(result.errors)
             .map(([field, messages]) => `${field}: ${(messages as string[]).join(', ')}`)
             .join('\n');
@@ -127,20 +127,27 @@ export default function SignupPage() {
             </div>
 
             <Alert className="bg-primary/10 border-primary/30">
-              <CreditCard className="h-5 w-5 text-primary" />
-              <AlertTitle className="text-primary">Subscription Plans</AlertTitle>
+              <Sparkles className="h-5 w-5 text-primary" />
+              <AlertTitle className="text-primary">Start with a 1-MONTH FREE TRIAL!</AlertTitle>
               <AlertDescription>
-                <p>Access all features with our simple subscription:</p>
-                <ul className="list-disc list-inside ml-4 my-2">
-                  <li><strong>Monthly:</strong> N5,000 (or equivalent)</li>
-                  <li><strong>Yearly:</strong> N100,000 (or equivalent)</li>
+                <p className="mb-2">Enjoy full access to all Rxpiration Alert features, no payment needed upfront during your trial period.</p>
+                <p className="font-semibold">After your trial, continue with one of our plans:</p>
+                <ul className="list-disc list-inside ml-4 my-2 space-y-1">
+                  <li>
+                    <strong>Monthly Plan:</strong> N5,000
+                    {/* Link could be activated post-trial <a href={paystackMonthlyLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">(Pay Monthly)</a> */}
+                  </li>
+                  <li>
+                    <strong>Yearly Plan:</strong> N100,000 - Best value for uninterrupted long-term access.
+                    {/* Link could be activated post-trial <a href={paystackYearlyLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">(Pay Yearly)</a> */}
+                  </li>
                 </ul>
-                <p className="text-sm">Payment will be processed securely via Paystack or Flutterwave after registration.</p>
+                <p className="text-sm text-muted-foreground">You'll be reminded to choose a plan before your trial ends. Payments will be processed securely via Paystack.</p>
               </AlertDescription>
             </Alert>
             
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Sign Up & Proceed to Payment'}
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Sign Up & Start Free Trial'}
             </Button>
           </form>
         </CardContent>

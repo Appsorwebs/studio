@@ -1,14 +1,15 @@
 
 "use client";
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { UserCircle, Edit2, Bell, Building, Phone, MapPin, Link as LinkIcon, Globe, ThumbsUp, CreditCard, Loader2 } from "lucide-react";
+import { UserCircle, Edit2, Bell, Building, Phone, MapPin, Link as LinkIcon, Globe, ThumbsUp, CreditCard, Loader2, CalendarDays, Star } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from '@/hooks/use-toast';
+import { format, addMonths } from 'date-fns';
 
 // Placeholder data - in a real app, this would come from user state/backend after login
 const initialPharmacistProfile = {
@@ -27,8 +28,14 @@ const initialPharmacistProfile = {
     "", 
   ],
   websiteLink: "https://citycentralpharmacy.com",
-  subscriptionStatus: "Active",
-  subscriptionTier: "Yearly",
+  // Subscription and trial related fields would ideally come from backend
+  subscriptionStatus: "Trial Active", 
+  subscriptionTier: "N/A", 
+  trialEndDate: addMonths(new Date(), 1).toISOString(), // Simulating trial end date for display
+  paymentLinks: { // These would be used when trial ends or user wants to subscribe
+      monthly: "https://paystack.shop/pay/rxpiration",
+      yearly: "https://paystack.shop/pay/rxpiration1"
+  }
 };
 
 
@@ -36,6 +43,13 @@ export default function ProfilePage() {
   const { toast } = useToast();
   const [profileData, setProfileData] = useState(initialPharmacistProfile);
   const [isLoading, setIsLoading] = useState(false);
+  const [displayTrialEndDate, setDisplayTrialEndDate] = useState('');
+
+  useEffect(() => {
+    if (profileData.trialEndDate) {
+      setDisplayTrialEndDate(format(new Date(profileData.trialEndDate), "MMMM dd, yyyy"));
+    }
+  }, [profileData.trialEndDate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -52,8 +66,7 @@ export default function ProfilePage() {
     event.preventDefault();
     setIsLoading(true);
     
-    // Data to send (excluding fields not meant to be updated or derived like pharmacyName if it's a username)
-    const { memberSince, subscriptionStatus, subscriptionTier, ...dataToUpdate } = profileData;
+    const { memberSince, subscriptionStatus, subscriptionTier, trialEndDate, paymentLinks, ...dataToUpdate } = profileData;
 
     try {
       const response = await fetch('/api/profile/update', {
@@ -72,8 +85,6 @@ export default function ProfilePage() {
           description: result.message || "Your profile changes have been saved (simulated).",
           variant: "default",
         });
-        // Optionally update profileData if the backend returns the full updated object
-        // setProfileData(prev => ({ ...prev, ...result.updatedData }));
       } else {
         let errorMessages = result.message || "An error occurred while updating your profile.";
         if (result.errors) {
@@ -102,8 +113,9 @@ export default function ProfilePage() {
   
   const handleManageSubscription = () => {
      toast({
-        title: "Feature Coming Soon",
-        description: "Subscription management via Paystack/Flutterwave is planned for a future update.",
+        title: "Manage Subscription",
+        description: "Subscription management options and payment links will be available here or via email reminders as your trial period nears its end.",
+        duration: 7000,
     });
   };
 
@@ -210,11 +222,16 @@ export default function ProfilePage() {
             </h3>
             <div className="space-y-2 text-sm">
                 <p><span className="font-medium text-muted-foreground">Status:</span> <span className="text-foreground font-semibold text-green-600">{profileData.subscriptionStatus}</span></p>
-                <p><span className="font-medium text-muted-foreground">Plan:</span> <span className="text-foreground">{profileData.subscriptionTier}</span></p>
-                <p><span className="font-medium text-muted-foreground">Next Billing Date:</span> <span className="text-foreground">October 26, 2024 (Placeholder)</span></p>
+                {profileData.subscriptionStatus === "Trial Active" && displayTrialEndDate && (
+                  <p><Star className="inline mr-1 h-4 w-4 text-yellow-500" /> <span className="font-medium text-muted-foreground">Trial Ends:</span> <span className="text-foreground">{displayTrialEndDate}</span></p>
+                )}
+                {profileData.subscriptionStatus !== "Trial Active" && (
+                    <p><span className="font-medium text-muted-foreground">Plan:</span> <span className="text-foreground">{profileData.subscriptionTier}</span></p>
+                )}
+                {/* <p><span className="font-medium text-muted-foreground">Next Billing Date:</span> <span className="text-foreground">October 26, 2024 (Placeholder)</span></p> */}
             </div>
             <Button variant="outline" className="mt-4" onClick={handleManageSubscription}>Manage Subscription</Button>
-            <p className="text-xs text-muted-foreground mt-2"><em>Subscription management will be handled via Paystack/Flutterwave.</em></p>
+            <p className="text-xs text-muted-foreground mt-2"><em>Subscription management will be handled via Paystack. You'll be prompted to subscribe before your trial ends.</em></p>
           </div>
           
           {/* Notification Preferences (Existing) */}
@@ -225,6 +242,7 @@ export default function ProfilePage() {
             <div className="space-y-2 text-sm">
                 <p><span className="font-medium text-muted-foreground">Email Alerts for Expiring Drugs:</span> <span className="text-foreground">Enabled (Placeholder)</span></p>
                 <p><span className="font-medium text-muted-foreground">Weekly Summary Email:</span> <span className="text-foreground">Disabled (Placeholder)</span></p>
+                <p><span className="font-medium text-muted-foreground">Subscription Reminders:</span> <span className="text-foreground">Enabled (Placeholder)</span></p>
             </div>
             <p className="text-xs text-muted-foreground mt-3"><em>Customize your notification settings here in an upcoming update.</em></p>
           </div>
@@ -234,7 +252,7 @@ export default function ProfilePage() {
               Profile UI is Interactive
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              You can edit your profile information. Saving changes is now (simulated) via a backend API call. Full database persistence is the next step.
+              You can edit your profile information. Saving changes is (simulated) via a backend API call. Full database persistence is the next step.
             </p>
           </div>
         </CardContent>
