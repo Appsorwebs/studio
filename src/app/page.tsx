@@ -1,44 +1,68 @@
 
-"use client"; // Make this a client component for calendar state
+"use client"; 
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/Logo';
 import SpinnerLogo from '@/components/SpinnerLogo';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { ArrowRight, PackageCheck, HandHeart, BarChartBig, Users, Pill, CalendarDays } from 'lucide-react';
+import { ArrowRight, PackageCheck, HandHeart, BarChartBig, Users, Pill, CalendarDays, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
 import { AppFooter } from '@/components/layout/AppFooter';
-import { allMockDrugs } from '@/lib/mock-data';
 import type { Drug } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format, parseISO } from 'date-fns';
 import { Calendar } from "@/components/ui/calendar";
-import { useState, useMemo } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useMemo, useEffect } from "react";
 
 export default function LandingPage() {
-  const featuredDrugs: Drug[] = allMockDrugs.filter(drug => drug.status === 'Available' || drug.status === 'Donated').slice(0, 3);
-
+  const [featuredDrugs, setFeaturedDrugs] = useState<Drug[]>([]);
+  const [allDrugsForCalendar, setAllDrugsForCalendar] = useState<Drug[]>([]);
+  const [isLoadingDrugs, setIsLoadingDrugs] = useState(true);
+  const [errorLoadingDrugs, setErrorLoadingDrugs] = useState<string | null>(null);
+  
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date | undefined>(new Date());
 
+  useEffect(() => {
+    async function fetchDrugsData() {
+      setIsLoadingDrugs(true);
+      setErrorLoadingDrugs(null);
+      try {
+        const response = await fetch('/api/drugs');
+        if (!response.ok) {
+          throw new Error('Failed to fetch drug data');
+        }
+        const data: Drug[] = await response.json();
+        setAllDrugsForCalendar(data);
+        setFeaturedDrugs(data.filter(drug => drug.status === 'Available' || drug.status === 'Donated').slice(0, 3));
+      } catch (err) {
+        setErrorLoadingDrugs(err instanceof Error ? err.message : "An unknown error occurred");
+        console.error("Error fetching drug data for landing page:", err);
+      } finally {
+        setIsLoadingDrugs(false);
+      }
+    }
+    fetchDrugsData();
+  }, []);
+
   const drugExpirationDates = useMemo(() => {
-    return allMockDrugs
+    return allDrugsForCalendar
       .map(drug => drug.expirationDate ? parseISO(drug.expirationDate) : null)
       .filter(Boolean) as Date[];
-  }, []);
+  }, [allDrugsForCalendar]);
 
   const calendarModifiers = useMemo(() => ({
     expiration: drugExpirationDates,
   }), [drugExpirationDates]);
 
   const calendarModifiersClassNames = {
-    expiration: 'bg-destructive/20 text-destructive-foreground rounded-full', // Style for expiration dates
+    expiration: 'bg-destructive/20 text-destructive-foreground rounded-full',
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-background font-body">
-      {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
           <Link href="/" className="flex items-center">
@@ -53,9 +77,7 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="flex-1">
-        {/* Hero Section */}
         <section className="py-16 md:py-24 lg:py-32 bg-gradient-to-br from-primary/10 via-background to-background">
           <div className="container mx-auto px-4 md:px-6 text-center">
             <div className="mb-8 inline-block p-2 rounded-lg">
@@ -80,7 +102,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Interactive Calendar Section (Replaces "How it Works") */}
         <section id="visualize-expirations" className="py-16 md:py-24 bg-muted/50">
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center mb-12">
@@ -89,31 +110,51 @@ export default function LandingPage() {
                 Visualize Your Expiration Timeline
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto mt-4">
-                Our interactive calendar helps you monitor upcoming drug expirations at a glance. Select dates and see mock expiration highlights based on inventory data.
+                Our interactive calendar helps you monitor upcoming drug expirations. Dates with expiring drugs are highlighted.
               </p>
             </div>
             <div className="flex justify-center">
-              <Card className="shadow-xl p-4 md:p-6">
-                <Calendar
-                  mode="single"
-                  selected={selectedCalendarDate}
-                  onSelect={setSelectedCalendarDate}
-                  modifiers={calendarModifiers}
-                  modifiersClassNames={calendarModifiersClassNames}
-                  className="rounded-md border"
-                />
-                {selectedCalendarDate && (
-                  <p className="mt-4 text-sm text-center text-muted-foreground">
-                    Selected: {format(selectedCalendarDate, "PPP")}
-                  </p>
-                )}
-              </Card>
+              {isLoadingDrugs && (
+                <Card className="shadow-xl p-4 md:p-6 w-full max-w-md">
+                  <Skeleton className="h-[290px] w-full" />
+                  <Skeleton className="h-4 w-1/2 mx-auto mt-4" />
+                </Card>
+              )}
+              {errorLoadingDrugs && !isLoadingDrugs && (
+                 <Card className="shadow-xl p-4 md:p-6 w-full max-w-md text-center">
+                    <AlertTriangle className="mx-auto h-10 w-10 text-destructive mb-2"/>
+                    <p className="text-destructive">Could not load drug data for calendar.</p>
+                    <p className="text-sm text-muted-foreground">{errorLoadingDrugs}</p>
+                 </Card>
+              )}
+              {!isLoadingDrugs && !errorLoadingDrugs && allDrugsForCalendar.length > 0 && (
+                <Card className="shadow-xl p-4 md:p-6">
+                  <Calendar
+                    mode="single"
+                    selected={selectedCalendarDate}
+                    onSelect={setSelectedCalendarDate}
+                    modifiers={calendarModifiers}
+                    modifiersClassNames={calendarModifiersClassNames}
+                    className="rounded-md border"
+                  />
+                  {selectedCalendarDate && (
+                    <p className="mt-4 text-sm text-center text-muted-foreground">
+                      Selected: {format(selectedCalendarDate, "PPP")}
+                    </p>
+                  )}
+                </Card>
+              )}
+               {!isLoadingDrugs && !errorLoadingDrugs && allDrugsForCalendar.length === 0 && (
+                 <Card className="shadow-xl p-4 md:p-6 w-full max-w-md text-center">
+                    <CalendarDays className="mx-auto h-10 w-10 text-muted-foreground mb-2"/>
+                    <p className="text-muted-foreground">No drug expiration data currently available to display.</p>
+                 </Card>
+              )}
             </div>
           </div>
         </section>
 
-        {/* Featured Drugs Section */}
-        {featuredDrugs.length > 0 && (
+        {!isLoadingDrugs && featuredDrugs.length > 0 && (
           <section id="featured-drugs" className="py-16 md:py-24 bg-secondary/30">
             <div className="container mx-auto px-4 md:px-6">
               <div className="text-center mb-12">
@@ -164,7 +205,6 @@ export default function LandingPage() {
           </section>
         )}
 
-        {/* Features Section */}
         <section id="features" className="py-16 md:py-24 bg-background">
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center mb-12">
@@ -191,7 +231,6 @@ export default function LandingPage() {
           </div>
         </section>
         
-        {/* Call to Action Section */}
         <section className="py-16 md:py-24 bg-primary/80 text-primary-foreground">
           <div className="container mx-auto px-4 md:px-6 text-center">
             <h2 className="text-3xl md:text-4xl font-bold font-headline mb-6">Ready to Reduce Waste and Improve Access?</h2>

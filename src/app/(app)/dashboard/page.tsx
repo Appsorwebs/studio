@@ -7,7 +7,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLe
 import { BarChart, LineChart, PieChart, Bar, Line, Pie, Cell, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend as RechartsLegend } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar } from "@/components/ui/calendar";
-import { allMockDrugs } from "@/lib/mock-data";
+import type { Drug } from "@/types";
 import { parseISO, format } from "date-fns";
 
 
@@ -40,7 +40,7 @@ interface SummaryStats {
     donationsFacilitatedMessage: string;
 }
 
-interface DashboardData {
+interface DashboardPageData { // Renamed from DashboardData to avoid conflict
   expiringDrugsData: ExpiringDrugData[];
   inventoryByCategoryData: InventoryByCategoryData[];
   donationTrendData: DonationTrendData[];
@@ -54,7 +54,7 @@ const chartConfig = {
   received: { label: "Received", color: "hsl(var(--chart-2))" },
 };
 
-const initialDashboardData: DashboardData = {
+const initialDashboardPageData: DashboardPageData = {
     expiringDrugsData: [],
     inventoryByCategoryData: [],
     donationTrendData: [],
@@ -72,16 +72,60 @@ const initialDashboardData: DashboardData = {
 
 
 export default function DashboardPage() {
-  const [dashboardData, setDashboardData] = useState<DashboardData>(initialDashboardData);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [dashboardPageData, setDashboardPageData] = useState<DashboardPageData>(initialDashboardPageData);
+  const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
+  
+  const [calendarDrugs, setCalendarDrugs] = useState<Drug[]>([]);
+  const [isLoadingCalendarDrugs, setIsLoadingCalendarDrugs] = useState(true);
+  const [calendarDrugsError, setCalendarDrugsError] = useState<string | null>(null);
+
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date | undefined>(new Date());
 
+  useEffect(() => {
+    async function fetchDashboardSummaryData() {
+      setIsLoadingDashboard(true);
+      setDashboardError(null);
+      try {
+        const response = await fetch('/api/dashboard');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch dashboard summary: ${response.statusText}`);
+        }
+        const data: DashboardPageData = await response.json();
+        setDashboardPageData(data);
+      } catch (err) {
+        setDashboardError(err instanceof Error ? err.message : "An unknown error occurred fetching summary");
+        console.error("Error fetching dashboard summary data:", err);
+      } finally {
+        setIsLoadingDashboard(false);
+      }
+    }
+    async function fetchCalendarDrugData() {
+      setIsLoadingCalendarDrugs(true);
+      setCalendarDrugsError(null);
+      try {
+        const response = await fetch('/api/drugs');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch drugs for calendar: ${response.statusText}`);
+        }
+        const data: Drug[] = await response.json();
+        setCalendarDrugs(data);
+      } catch (err) {
+        setCalendarDrugsError(err instanceof Error ? err.message : "An unknown error occurred fetching drugs for calendar");
+        console.error("Error fetching drug data for calendar:", err);
+      } finally {
+        setIsLoadingCalendarDrugs(false);
+      }
+    }
+    fetchDashboardSummaryData();
+    fetchCalendarDrugData();
+  }, []);
+
   const drugExpirationDates = useMemo(() => {
-    return allMockDrugs
+    return calendarDrugs
       .map(drug => drug.expirationDate ? parseISO(drug.expirationDate) : null)
       .filter(Boolean) as Date[];
-  }, []);
+  }, [calendarDrugs]);
 
   const calendarModifiers = useMemo(() => ({
     expiration: drugExpirationDates,
@@ -91,28 +135,8 @@ export default function DashboardPage() {
     expiration: 'bg-destructive/20 text-destructive-foreground rounded-full',
   };
 
-  useEffect(() => {
-    async function fetchData() {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await fetch('/api/dashboard');
-        if (!response.ok) {
-          throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
-        }
-        const data: DashboardData = await response.json();
-        setDashboardData(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An unknown error occurred");
-        console.error("Error fetching dashboard data:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchData();
-  }, []);
 
-  if (isLoading) {
+  if (isLoadingDashboard || isLoadingCalendarDrugs) {
     return (
       <div className="space-y-6">
         <h1 className="text-3xl font-bold">Dashboard</h1>
@@ -120,26 +144,26 @@ export default function DashboardPage() {
           {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-[120px]" />)}
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <Skeleton className="h-[380px]" />
-          <Skeleton className="h-[380px]" />
-          <Skeleton className="h-[380px]" />
+          <Skeleton className="h-[380px]" /> {/* Calendar Placeholder */}
+          <Skeleton className="h-[380px]" /> {/* Chart Placeholder */}
+          <Skeleton className="h-[380px]" /> {/* Chart Placeholder */}
         </div>
-        <Skeleton className="h-[430px]" />
+        <Skeleton className="h-[430px]" /> {/* Large Chart Placeholder */}
       </div>
     );
   }
 
-  if (error) {
+  if (dashboardError) { // Only major error for summary breaks the whole page. Calendar error is handled inline.
     return (
       <div className="space-y-6 text-center">
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <AlertTriangle className="mx-auto h-12 w-12 text-destructive" />
-        <p className="text-destructive">Could not load dashboard data: {error}</p>
+        <p className="text-destructive">Could not load dashboard data: {dashboardError}</p>
       </div>
     );
   }
   
-  const { expiringDrugsData, inventoryByCategoryData, donationTrendData, summaryStats } = dashboardData;
+  const { expiringDrugsData, inventoryByCategoryData, donationTrendData, summaryStats } = dashboardPageData;
 
   return (
     <div className="space-y-6">
@@ -188,30 +212,48 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"> {/* Adjusted grid for 3 columns on large screens */}
-        <Card className="lg:col-span-1"> {/* Calendar takes 1 span */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle>Events &amp; Reporting Calendar</CardTitle>
             <CardDescription>Drug expirations &amp; date selection.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center">
-            <Calendar
-              mode="single"
-              selected={selectedCalendarDate}
-              onSelect={setSelectedCalendarDate}
-              modifiers={calendarModifiers}
-              modifiersClassNames={calendarModifiersClassNames}
-              className="rounded-md border"
-            />
-            {selectedCalendarDate && (
-              <p className="mt-4 text-sm text-muted-foreground">
-                Selected date for report: {format(selectedCalendarDate, "PPP")}
-              </p>
+            {isLoadingCalendarDrugs && <Skeleton className="h-[290px] w-full rounded-md border" />}
+            {calendarDrugsError && !isLoadingCalendarDrugs && (
+                <div className="text-center py-10 text-destructive">
+                    <AlertTriangle className="mx-auto h-8 w-8 mb-2"/>
+                    <p>Could not load expiration data for calendar.</p>
+                    <p className="text-xs">{calendarDrugsError}</p>
+                </div>
+            )}
+            {!isLoadingCalendarDrugs && !calendarDrugsError && calendarDrugs.length === 0 && (
+                <div className="text-center py-10 text-muted-foreground">
+                    <CalendarDays className="mx-auto h-8 w-8 mb-2"/>
+                    <p>No drug expiration data to display.</p>
+                </div>
+            )}
+            {!isLoadingCalendarDrugs && !calendarDrugsError && calendarDrugs.length > 0 && (
+              <>
+                <Calendar
+                  mode="single"
+                  selected={selectedCalendarDate}
+                  onSelect={setSelectedCalendarDate}
+                  modifiers={calendarModifiers}
+                  modifiersClassNames={calendarModifiersClassNames}
+                  className="rounded-md border"
+                />
+                {selectedCalendarDate && (
+                  <p className="mt-4 text-sm text-muted-foreground">
+                    Selected date for report: {format(selectedCalendarDate, "PPP")}
+                  </p>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
         
-        <Card className="lg:col-span-1"> {/* Expiring Drugs Chart takes 1 span */}
+        <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle>Drugs Expiring Soon</CardTitle>
             <CardDescription>Count of drugs by expiration window</CardDescription>
@@ -235,7 +277,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-1"> {/* Inventory Chart takes 1 span */}
+        <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle>Inventory by Category</CardTitle>
             <CardDescription>Distribution of drugs across categories</CardDescription>
@@ -282,4 +324,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
