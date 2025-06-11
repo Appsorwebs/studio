@@ -13,25 +13,18 @@ export const metadata: Metadata = {
 const SetInitialTheme = () => {
   const scriptContent = `
     (function() {
-      function getInitialTheme() {
-        try {
-          const storedTheme = localStorage.getItem('theme');
-          if (storedTheme === 'dark' || storedTheme === 'light') {
-            return storedTheme;
-          }
-          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            return 'dark';
-          }
-        } catch (e) {
-          // If localStorage or matchMedia is not available, or an error occurs
+      var d=document.documentElement,c=d.classList;
+      var s; // stored theme
+      try{s=localStorage.getItem('theme')}catch(e){} // s can be 'light', 'dark', or null (for system)
+      if(s==='light'||s==='dark'){ // User has an explicit preference
+        c.remove(s==='light'?'dark':'light'); // ensure opposite class is removed
+        c.add(s); // add the explicit theme class
+      } else { // System preference or no preference stored (treat as system)
+        if(window.matchMedia('(prefers-color-scheme: dark)').matches){
+          c.add('dark');
+        }else{
+          c.remove('dark');
         }
-        return 'light'; // Default theme
-      }
-      const theme = getInitialTheme();
-      if (theme === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
       }
     })();
   `;
