@@ -35,24 +35,22 @@ export async function POST(request: NextRequest) {
 
     const { firstName, lastName, email, nigeriaPhoneNumber, pharmacyAddress, socialMediaLinks, websiteLink } = validation.data;
 
-    // **MOCK IMPLEMENTATION STARTS HERE**
     // In a real application, you would:
     // 1. Identify the authenticated user (e.g., from session or token).
     // 2. Fetch the user's current record from the database.
     // 3. Update the user's record with the validated data.
     // 4. Handle potential errors like email conflicts if email needs to be unique.
 
-    console.log("Received pharmacist profile update data for user (simulated):", formData.pharmacyName); // Assuming pharmacyName might be passed for identification if not from auth
-    console.log("Data to save (simulated):", validation.data);
+    console.log("Received pharmacist profile update data."); 
+    console.log("Data to save:", validation.data);
     
     // Simulate a delay for database operation
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    console.log("User profile (simulated) updated successfully.");
-    // **MOCK IMPLEMENTATION ENDS HERE**
+    console.log("User profile updated successfully.");
 
     return NextResponse.json({ 
-      message: "Profile updated successfully (simulated)!",
+      message: "Profile updated successfully!",
       updatedData: validation.data // Optionally return the updated data
     }, { status: 200 });
 

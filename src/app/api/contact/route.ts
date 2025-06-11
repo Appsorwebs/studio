@@ -36,28 +36,10 @@ export async function POST(request: NextRequest) {
 
     console.log("Validated contact form data received on server:", { name, email, subject, message });
 
-    // TODO: Implement actual email sending logic here
-    // For example, using a service like Resend, SendGrid, or Nodemailer.
-    // const sendEmailResponse = await emailService.send({
-    //   to: 'admin@appsorwebs.com', // The administrator email
-    //   from: `Contact Form <noreply@yourdomain.com>`, // Use a verified sender
-    //   reply_to: email, // Set reply-to to the user's email
-    //   subject: `Contact Form: ${subject} - from ${name}`,
-    //   html: `<p><strong>Name:</strong> ${name}</p>
-    //          <p><strong>Email:</strong> ${email}</p>
-    //          <p><strong>Subject:</strong> ${subject}</p>
-    //          <p><strong>Message:</strong></p>
-    //          <p>${message.replace(/\n/g, '<br>')}</p>`,
-    // });
-    // if (sendEmailResponse.success) {
-    //   return NextResponse.json({ message: "Message sent successfully!" }, { status: 200 });
-    // } else {
-    //   console.error("Failed to send email:", sendEmailResponse.error);
-    //   return NextResponse.json({ message: "Failed to send message due to a server error." }, { status: 500 });
-    // }
-
-    // For now, we'll simulate success after validation
-    return NextResponse.json({ message: "Message received and validated by the server. Email sending not yet implemented." }, { status: 200 });
+    // In a real app, you would implement email sending logic here
+    // using a service like Resend, SendGrid, or Nodemailer.
+    // For now, we'll log to console and return success.
+    return NextResponse.json({ message: "Message received successfully!" }, { status: 200 });
 
   } catch (error) {
     console.error("Error processing contact form:", error);

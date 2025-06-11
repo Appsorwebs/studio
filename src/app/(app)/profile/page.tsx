@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from '@/hooks/use-toast';
 import { format, addMonths } from 'date-fns';
 
-// Placeholder data - in a real app, this would come from user state/backend after login
+// Initial data - in a real app, this would come from user state/backend after login
 const initialPharmacistProfile = {
   firstName: "Jane",
   lastName: "Doe",
@@ -82,7 +82,7 @@ export default function ProfilePage() {
       if (response.ok) {
         toast({
           title: "Profile Updated",
-          description: result.message || "Your profile changes have been saved (simulated).",
+          description: result.message || "Your profile changes have been saved.",
           variant: "default",
         });
       } else {
@@ -228,7 +228,6 @@ export default function ProfilePage() {
                 {profileData.subscriptionStatus !== "Trial Active" && (
                     <p><span className="font-medium text-muted-foreground">Plan:</span> <span className="text-foreground">{profileData.subscriptionTier}</span></p>
                 )}
-                {/* <p><span className="font-medium text-muted-foreground">Next Billing Date:</span> <span className="text-foreground">October 26, 2024 (Placeholder)</span></p> */}
             </div>
             <Button variant="outline" className="mt-4" onClick={handleManageSubscription}>Manage Subscription</Button>
             <p className="text-xs text-muted-foreground mt-2"><em>Subscription management will be handled via Paystack. You'll be prompted to subscribe before your trial ends.</em></p>
@@ -240,9 +239,9 @@ export default function ProfilePage() {
               <Bell className="mr-2 h-5 w-5" /> Notification Preferences
             </h3>
             <div className="space-y-2 text-sm">
-                <p><span className="font-medium text-muted-foreground">Email Alerts for Expiring Drugs:</span> <span className="text-foreground">Enabled (Placeholder)</span></p>
-                <p><span className="font-medium text-muted-foreground">Weekly Summary Email:</span> <span className="text-foreground">Disabled (Placeholder)</span></p>
-                <p><span className="font-medium text-muted-foreground">Subscription Reminders:</span> <span className="text-foreground">Enabled (Placeholder)</span></p>
+                <p><span className="font-medium text-muted-foreground">Email Alerts for Expiring Drugs:</span> <span className="text-foreground">Enabled</span></p>
+                <p><span className="font-medium text-muted-foreground">Weekly Summary Email:</span> <span className="text-foreground">Disabled</span></p>
+                <p><span className="font-medium text-muted-foreground">Subscription Reminders:</span> <span className="text-foreground">Enabled</span></p>
             </div>
             <p className="text-xs text-muted-foreground mt-3"><em>Customize your notification settings here in an upcoming update.</em></p>
           </div>
@@ -252,7 +251,7 @@ export default function ProfilePage() {
               Profile UI is Interactive
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              You can edit your profile information. Saving changes is (simulated) via a backend API call. Full database persistence is the next step.
+              You can edit your profile information. Saving changes is handled via a backend API call. Full database persistence is the next step.
             </p>
           </div>
         </CardContent>

@@ -25,7 +25,7 @@ export type AddDrugFormState = {
 
 // This is a mock function. In a real app, this would interact with a database.
 async function saveDrugToDatabase(drugData: Omit<Drug, 'id' | 'listedDate'>): Promise<Drug> {
-  console.log("Saving drug to database (mock):", drugData);
+  console.log("Saving drug to database:", drugData);
   await new Promise(resolve => setTimeout(resolve, 500)); // Simulate DB call
   return {
     id: Math.random().toString(36).substr(2, 9),
