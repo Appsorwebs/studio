@@ -17,20 +17,18 @@ const SetInitialTheme = () => {
     (function() {
       var d=document.documentElement,c=d.classList;
       var themePreference;
-      try { themePreference = localStorage.getItem('theme'); } catch(e) {} // Gracefully handle localStorage errors
+      try { themePreference = localStorage.getItem('theme'); } catch(e) {}
 
       if (themePreference === 'dark') {
         c.add('dark');
       } else if (themePreference === 'light') {
-        c.remove('dark'); // Explicitly ensure light if 'light' is stored
-      } else if (themePreference === 'system') {
+        c.remove('dark');
+      } else { // 'system' or null/undefined/invalid
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
           c.add('dark');
         } else {
-          c.remove('dark'); // System is light
+          c.remove('dark'); // Default to light
         }
-      } else { // Default to light if no valid preference is stored (null, undefined, or invalid value)
-        c.remove('dark');
       }
     })();
   `;
