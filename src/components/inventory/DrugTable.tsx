@@ -3,6 +3,7 @@
 
 import { useState, useMemo } from 'react';
 import type { Drug } from "@/types";
+import { allMockDrugs } from "@/lib/mock-data"; // Import centralized mock data
 import {
   Table,
   TableBody,
@@ -19,19 +20,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { MoreHorizontal, Edit3, Trash2, Eye, PackagePlus } from "lucide-react";
 import { format, differenceInDays, parseISO } from 'date-fns';
 import Link from 'next/link';
-import { DrugDetailsDialog } from './DrugDetailsDialog'; // Import the new dialog
-
-const mockDrugs: Drug[] = [
-  { id: "1", name: "Amoxicillin", dosage: "250mg", manufacturer: "Pfizer", expirationDate: "2025-12-31", category: "Antibiotic", quantity: 100, status: "Available", listedDate: "2023-01-15", manufacturingDate: "2023-01-01", storageConditions: "Room temperature" },
-  { id: "2", name: "Paracetamol", dosage: "500mg", manufacturer: "GSK", expirationDate: "2024-08-15", category: "Analgesic", quantity: 250, status: "Available", listedDate: "2023-02-20", manufacturingDate: "2022-08-01", storageConditions: "Cool, dry place"  },
-  { id: "3", name: "Lisinopril", dosage: "10mg", manufacturer: "AstraZeneca", expirationDate: "2024-06-30", category: "Antihypertensive", quantity: 50, status: "Available", listedDate: "2023-03-10", manufacturingDate: "2022-06-01", storageConditions: "Protect from light"  },
-  { id: "4", name: "Metformin", dosage: "850mg", manufacturer: "Merck", expirationDate: "2026-01-20", category: "Antidiabetic", quantity: 120, status: "Donated", listedDate: "2023-04-05", manufacturingDate: "2023-01-01", storageConditions: "Room temperature"  },
-  { id: "5", name: "Atorvastatin", dosage: "20mg", manufacturer: "Pfizer", expirationDate: "2023-05-01", category: "Cholesterol", quantity: 0, status: "Expired", listedDate: "2022-11-01", manufacturingDate: "2021-05-01", storageConditions: "Room temperature"  },
-  { id: "6", name: "Salbutamol Inhaler", dosage: "100mcg", manufacturer: "Cipla", expirationDate: "2024-07-22", category: "Respiratory", quantity: 75, status: "Available", listedDate: "2023-01-25", manufacturingDate: "2023-01-01", storageConditions: "Store below 25°C"  },
-];
+import { DrugDetailsDialog } from './DrugDetailsDialog';
 
 export function DrugTable() {
-  const [drugs, setDrugs] = useState<Drug[]>(mockDrugs);
+  const [drugs, setDrugs] = useState<Drug[]>(allMockDrugs); // Use centralized mock data
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<Drug['status'] | 'All'>('All');
   
@@ -54,7 +46,7 @@ export function DrugTable() {
     const daysToExpire = differenceInDays(parseISO(expirationDate), new Date());
     if (status === 'Expired' || daysToExpire < 0) return "destructive";
     if (status === 'Donated') return "default"; 
-    if (daysToExpire <= 30) return "secondary"; // Often yellow/orange
+    if (daysToExpire <= 30) return "secondary"; 
     return "default"; 
   };
 
@@ -148,7 +140,7 @@ export function DrugTable() {
                       <DropdownMenuItem onSelect={() => handleViewDetails(drug)}>
                         <Eye className="mr-2 h-4 w-4" /> View Details
                       </DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => alert(`Editing ${drug.name} - coming soon!`)}>
+                      <DropdownMenuItem onSelect={() => alert(\`Editing ${drug.name} - coming soon!\`)}>
                         <Edit3 className="mr-2 h-4 w-4" /> Edit
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />

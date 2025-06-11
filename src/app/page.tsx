@@ -4,11 +4,19 @@ import { Button } from '@/components/ui/button';
 import Logo from '@/components/Logo';
 import SpinnerLogo from '@/components/SpinnerLogo';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { ArrowRight, PackageCheck, HandHeart, BarChartBig, Users } from 'lucide-react';
+import { ArrowRight, PackageCheck, HandHeart, BarChartBig, Users, Pill } from 'lucide-react';
 import Image from 'next/image';
 import { AppFooter } from '@/components/layout/AppFooter';
+import { allMockDrugs } from '@/lib/mock-data'; // Import mock drug data
+import type { Drug } from '@/types'; // Import Drug type
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'; // Import Card components
+import { Badge } from '@/components/ui/badge';
+import { format, parseISO } from 'date-fns';
 
 export default function LandingPage() {
+  // Select a few drugs to feature, e.g., the first 3 available ones
+  const featuredDrugs: Drug[] = allMockDrugs.filter(drug => drug.status === 'Available' || drug.status === 'Donated').slice(0, 3);
+
   return (
     <div className="flex flex-col min-h-screen bg-background font-body">
       {/* Header */}
@@ -52,6 +60,58 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* Featured Drugs Section */}
+        {featuredDrugs.length > 0 && (
+          <section id="featured-drugs" className="py-16 md:py-24 bg-secondary/30">
+            <div className="container mx-auto px-4 md:px-6">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4">Featured Medications</h2>
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  Explore some of the medications managed and tracked on our platform.
+                </p>
+              </div>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {featuredDrugs.map((drug) => (
+                  <Card key={drug.id} className="flex flex-col overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div className="relative h-48 w-full bg-muted">
+                      <Image
+                        src={`https://placehold.co/600x400.png?text=${encodeURIComponent(drug.name)}`}
+                        alt={drug.name}
+                        layout="fill"
+                        objectFit="cover"
+                        data-ai-hint="medication product"
+                      />
+                    </div>
+                    <CardHeader>
+                      <CardTitle className="text-xl font-semibold">{drug.name}</CardTitle>
+                      <CardDescription>{drug.dosage} - {drug.manufacturer}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                      <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{drug.notes || `Category: ${drug.category}`}</p>
+                      <div className="flex items-center justify-between text-sm">
+                        <Badge variant={drug.status === 'Expired' ? 'destructive' : 'outline'}>{drug.status}</Badge>
+                        <span className="text-muted-foreground">Expires: {drug.expirationDate ? format(parseISO(drug.expirationDate), "MMM yyyy") : 'N/A'}</span>
+                      </div>
+                    </CardContent>
+                    <div className="p-4 border-t">
+                       <Button variant="link" className="w-full text-primary p-0" asChild>
+                           <Link href={`/search?q=${encodeURIComponent(drug.name)}`}>
+                            View Details
+                           </Link>
+                       </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+              <div className="text-center mt-12">
+                <Button asChild size="lg" variant="outline">
+                  <Link href="/search">Explore More Medications</Link>
+                </Button>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Features Section */}
         <section id="features" className="py-16 md:py-24 bg-background">
           <div className="container mx-auto px-4 md:px-6">
@@ -67,7 +127,7 @@ export default function LandingPage() {
                 { icon: HandHeart, title: "Facilitate Donations", description: "Easily connect with charities to donate surplus medications." },
                 { icon: BarChartBig, title: "Data Analytics", description: "Gain insights from comprehensive reports on trends and inventory levels." },
                 { icon: Users, title: "Seamless Collaboration", description: "Communicate effectively between pharmacists, patients, and organizations." },
-                { icon: PackageCheck, title: "Responsive & Accessible", description: "Access the platform anytime, anywhere, on any device." }
+                { icon: Pill, title: "AI-Powered Assistance", description: "Leverage AI for smart predictions and efficient management (Coming Soon)." }
               ].map((feature, index) => (
                 <div key={index} className="p-6 bg-card rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <feature.icon className="h-10 w-10 text-primary mb-4" />
@@ -95,6 +155,7 @@ export default function LandingPage() {
                 width={1200} 
                 height={600} 
                 className="rounded-xl shadow-2xl mx-auto"
+                data-ai-hint="dashboard mockup"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-xl"></div>
                <div className="absolute bottom-8 left-8 right-8 text-center md:text-left">

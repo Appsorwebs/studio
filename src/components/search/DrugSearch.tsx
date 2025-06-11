@@ -3,6 +3,7 @@
 
 import { useState, useMemo } from "react";
 import type { Drug } from "@/types";
+import { allMockDrugs } from "@/lib/mock-data"; // Import centralized mock data
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -10,19 +11,9 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search as SearchIcon, ListFilter, Package, BriefcaseMedical, CalendarClock } from "lucide-react";
 import { format, parseISO, differenceInDays } from "date-fns";
-import { DrugDetailsDialog } from '@/components/inventory/DrugDetailsDialog'; // Import the dialog
+import { DrugDetailsDialog } from '@/components/inventory/DrugDetailsDialog';
 
-const mockDrugs: Drug[] = [
-  { id: "1", name: "Amoxicillin", dosage: "250mg", manufacturer: "Pfizer", expirationDate: "2025-12-31", category: "Antibiotic", quantity: 100, status: "Available", listedDate: "2023-01-15", manufacturingDate: "2023-01-01", storageConditions: "Room temperature" },
-  { id: "2", name: "Paracetamol", dosage: "500mg", manufacturer: "GSK", expirationDate: "2024-08-15", category: "Analgesic", quantity: 250, status: "Available", listedDate: "2023-02-20", manufacturingDate: "2022-08-01", storageConditions: "Cool, dry place"  },
-  { id: "3", name: "Lisinopril", dosage: "10mg", manufacturer: "AstraZeneca", expirationDate: "2024-06-30", category: "Antihypertensive", quantity: 50, status: "Available", listedDate: "2023-03-10", manufacturingDate: "2022-06-01", storageConditions: "Protect from light" },
-  { id: "4", name: "Metformin", dosage: "850mg", manufacturer: "Merck", expirationDate: "2026-01-20", category: "Antidiabetic", quantity: 120, status: "Donated", listedDate: "2023-04-05", manufacturingDate: "2023-01-01", storageConditions: "Room temperature" },
-  { id: "5", name: "Aspirin", dosage: "81mg", manufacturer: "Bayer", expirationDate: "2024-09-01", category: "Analgesic", quantity: 300, status: "Available", listedDate: "2023-05-01", manufacturingDate: "2023-02-01", storageConditions: "Room temperature" },
-  { id: "6", name: "Omeprazole", dosage: "20mg", manufacturer: "Generic Co.", expirationDate: "2025-03-10", category: "PPI", quantity: 150, status: "Available", listedDate: "2023-06-15", manufacturingDate: "2023-03-01", storageConditions: "Cool, dry place" },
-  { id: "7", name: "Simvastatin", dosage: "40mg", manufacturer: "Pharma Inc.", expirationDate: "2023-07-01", category: "Cholesterol", quantity: 0, status: "Expired", listedDate: "2022-10-01", manufacturingDate: "2022-04-01", storageConditions: "Room temperature" },
-];
-
-const drugCategories = ["All", "Antibiotic", "Analgesic", "Antihypertensive", "Antidiabetic", "PPI", "Cholesterol", "Respiratory"];
+const drugCategories = ["All", "Antibiotic", "Analgesic", "Antihypertensive", "Antidiabetic", "PPI", "Cholesterol", "Respiratory", "Analgesic/Antiplatelet"];
 
 export function DrugSearch() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,7 +24,7 @@ export function DrugSearch() {
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
 
   const filteredDrugs = useMemo(() => {
-    let results = mockDrugs;
+    let results = allMockDrugs; // Use centralized mock data
 
     if (searchTerm) {
       results = results.filter(drug =>
@@ -67,7 +58,7 @@ export function DrugSearch() {
     const days = differenceInDays(parseISO(expirationDate), new Date());
     if (days < 0) return <Badge variant="destructive">Expired</Badge>;
     if (days <= 7) return <Badge variant="destructive">{days} days left</Badge>;
-    if (days <= 30) return <Badge variant="secondary">{days} days left</Badge>; // Often yellow/orange
+    if (days <= 30) return <Badge variant="secondary">{days} days left</Badge>; 
     return <span>{format(parseISO(expirationDate), "MMM dd, yyyy")}</span>;
   };
 
@@ -96,7 +87,7 @@ export function DrugSearch() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <Button variant="ghost" className="md:hidden"> {/* This button could open a filter drawer on mobile */}
+              <Button variant="ghost" className="md:hidden"> 
                 <ListFilter className="mr-2 h-4 w-4" /> Filters
               </Button>
             </div>
