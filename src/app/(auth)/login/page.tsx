@@ -78,6 +78,9 @@ export default function LoginPage() {
         case 'auth/invalid-credential': 
           errorMessage = "Invalid email or password.";
           break;
+        case 'auth/operation-not-allowed':
+          errorMessage = "Email/Password sign-in is not enabled for this app. Please contact support or check Firebase console settings.";
+          break;
         default:
           errorMessage = authError.message || "Failed to log in. Please try again.";
       }
@@ -110,7 +113,12 @@ export default function LoginPage() {
               <Input id="email" name="email" type="email" placeholder="you@example.com" required />
             </div>
             <div>
-              <Label htmlFor="password">Password</Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="password">Password</Label>
+                <Link href="/forgot-password" prefetch={false} className="text-xs text-primary hover:underline">
+                    Forgot your password?
+                </Link>
+              </div>
               <Input id="password" name="password" type="password" placeholder="Your password" required />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
@@ -122,9 +130,6 @@ export default function LoginPage() {
         <CardFooter className="flex-col items-center">
           <p className="text-sm text-muted-foreground">
             Don't have an account? <Link href="/signup" className="text-primary hover:underline">Sign Up</Link>
-          </p>
-           <p className="mt-4 text-xs text-muted-foreground text-center">
-             Forgot your password? (Functionality coming soon)
           </p>
         </CardFooter>
       </Card>
