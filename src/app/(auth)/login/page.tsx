@@ -11,14 +11,14 @@ import Logo from '@/components/Logo';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LogIn, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { authClient } from '@/lib/firebase/client'; // Import Firebase auth client
+import { authClient } from '@/lib/firebase/client'; 
 import { signInWithEmailAndPassword, AuthError } from 'firebase/auth';
-// import { useRouter } from 'next/navigation'; // Uncomment if redirecting after login
+import { useRouter } from 'next/navigation'; 
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  // const router = useRouter(); // Uncomment if redirecting after login
+  const router = useRouter(); 
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -30,24 +30,42 @@ export default function LoginPage() {
 
     try {
       const userCredential = await signInWithEmailAndPassword(authClient, email, password);
-      // Signed in 
       const user = userCredential.user;
-      console.log("Firebase login successful, user:", user);
+      console.log("Firebase client login successful, user:", user.uid);
 
-      toast({
-        title: "Login Successful! 🎉",
-        description: `Welcome back, ${user.email}!`, // You can customize this
-        variant: "default",
-        duration: 5000,
+      // Get ID token
+      const idToken = await user.getIdToken();
+
+      // Send ID token to backend to create session cookie
+      const response = await fetch('/api/auth/session-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ idToken }),
       });
-      (event.target as HTMLFormElement).reset();
-      // TODO: Implement session creation with backend and redirect
-      // For now, user is logged in on Firebase client, but no server session yet.
-      // router.push('/dashboard'); 
+
+      if (response.ok) {
+        toast({
+          title: "Login Successful! 🎉",
+          description: `Welcome back, ${user.email}! Redirecting...`,
+          variant: "default",
+          duration: 3000,
+        });
+        (event.target as HTMLFormElement).reset();
+        router.push('/dashboard'); 
+      } else {
+        const errorData = await response.json();
+        toast({
+          title: "Session Login Failed",
+          description: errorData.error || "Could not create a session. Please try again.",
+          variant: "destructive",
+        });
+      }
 
     } catch (error) {
       const authError = error as AuthError;
-      console.error("Firebase login error:", authError);
+      console.error("Firebase login error:", authError.code, authError.message);
       let errorMessage = "An unknown error occurred during login.";
       switch (authError.code) {
         case 'auth/invalid-email':
@@ -58,7 +76,7 @@ export default function LoginPage() {
           break;
         case 'auth/user-not-found':
         case 'auth/wrong-password':
-        case 'auth/invalid-credential': // Covers user not found and wrong password for newer SDKs
+        case 'auth/invalid-credential': 
           errorMessage = "Invalid email or password.";
           break;
         default:
