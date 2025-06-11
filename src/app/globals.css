@@ -50,40 +50,42 @@ body {
   }
 
   .dark {
-    --background: 200 14% 26%;  /* #37474F Darker Gray */
-    --foreground: 210 17% 82%;  /* #CACFD6 Light Gray for text */
-    --card: 200 14% 22%;        /* Slightly darker than background */
-    --card-foreground: 210 17% 82%;
-    --popover: 200 14% 22%;
-    --popover-foreground: 210 17% 82%;
-    --primary: 207 88% 68%;      /* #64B5F6 Soft Blue - kept same */
-    --primary-foreground: 207 80% 25%; /* Dark blue text, good contrast */
-    --secondary: 200 14% 30%;    /* Slightly lighter dark gray */
-    --secondary-foreground: 210 17% 82%;
-    --muted: 200 14% 30%;
-    --muted-foreground: 210 15% 65%; /* Lighter muted text for dark */
-    --accent: 174 63% 40%;       /* #26A69A Teal - kept same */
+    --background: 210 20% 12%;  /* Deeper, slightly desaturated blue-gray */
+    --foreground: 210 17% 88%;  /* Slightly brighter light gray for text */
+    --card: 210 20% 16%;        /* Slightly lighter than background, for depth */
+    --card-foreground: 210 17% 88%;
+    --popover: 210 20% 15%;     /* Similar to card, or slightly darker */
+    --popover-foreground: 210 17% 88%;
+    --primary: 210 90% 65%;      /* More vibrant blue */
+    --primary-foreground: 210 90% 15%; /* Darker blue for text on primary */
+    --secondary: 210 20% 25%;    /* A subtle secondary dark shade */
+    --secondary-foreground: 210 17% 80%; /* Foreground for secondary elements */
+    --muted: 210 18% 28%;        /* Muted dark shade */
+    --muted-foreground: 210 15% 60%; /* Softer muted text for dark */
+    --accent: 175 65% 55%;       /* Brighter Teal */
     --accent-foreground: 0 0% 98%; /* White text on teal */
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 70% 50%;     /* Adjusted destructive */
     --destructive-foreground: 0 0% 98%;
-    --border: 200 14% 35%;       /* Darker border */
-    --input: 200 14% 32%;        /* Dark input background */
-    --ring: 207 88% 68%;         /* Soft Blue for ring */
-    --chart-1: 207 88% 68%;
-    --chart-2: 174 63% 40%;
-    --chart-3: 220 70% 70%;
-    --chart-4: 43 74% 70%;
-    --chart-5: 27 87% 70%;
+    --border: 210 20% 22%;       /* Subtle border color */
+    --input: 210 20% 20%;        /* Dark input background, distinct */
+    --ring: 210 90% 65%;         /* Primary blue for ring */
+    
+    /* Chart colors can remain or be adjusted if they clash */
+    --chart-1: 210 90% 65%;      /* Adjusted to new primary */
+    --chart-2: 175 65% 55%;      /* Adjusted to new accent */
+    --chart-3: 230 75% 70%;      /* A complementary purple/blue */
+    --chart-4: 30 80% 65%;       /* A warm contrast */
+    --chart-5: 330 70% 68%;      /* A pink/magenta for variety */
 
     /* Sidebar specific colors for dark theme */
-    --sidebar-background: 200 14% 20%; /* Even darker for sidebar */
-    --sidebar-foreground: 210 17% 82%;
-    --sidebar-primary: 207 88% 68%;
-    --sidebar-primary-foreground: 207 80% 25%;
-    --sidebar-accent: 200 14% 30%;
-    --sidebar-accent-foreground: 210 17% 82%;
-    --sidebar-border: 200 14% 35%;
-    --sidebar-ring: 207 88% 68%;
+    --sidebar-background: 210 20% 9%;  /* Even deeper dark for sidebar */
+    --sidebar-foreground: 210 17% 80%; /* Slightly softer text */
+    --sidebar-primary: 210 90% 65%;    /* Consistent primary */
+    --sidebar-primary-foreground: 210 90% 15%; /* Consistent primary foreground */
+    --sidebar-accent: 210 20% 20%;     /* Accent for hover/active, like input */
+    --sidebar-accent-foreground: 210 17% 88%; /* Text on sidebar accent */
+    --sidebar-border: 210 20% 18%;    /* Subtle sidebar border */
+    --sidebar-ring: 210 90% 65%;
   }
 }
 
