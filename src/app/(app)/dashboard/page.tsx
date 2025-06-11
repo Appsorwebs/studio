@@ -1,11 +1,14 @@
 
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Package, Clock, Users, AlertTriangle } from "lucide-react";
+import { Package, Clock, Users, AlertTriangle, CalendarDays } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import { BarChart, LineChart, PieChart, Bar, Line, Pie, Cell, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend as RechartsLegend } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Calendar } from "@/components/ui/calendar";
+import { allMockDrugs } from "@/lib/mock-data";
+import { parseISO, format } from "date-fns";
 
 
 interface ExpiringDrugData {
@@ -72,6 +75,21 @@ export default function DashboardPage() {
   const [dashboardData, setDashboardData] = useState<DashboardData>(initialDashboardData);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date | undefined>(new Date());
+
+  const drugExpirationDates = useMemo(() => {
+    return allMockDrugs
+      .map(drug => drug.expirationDate ? parseISO(drug.expirationDate) : null)
+      .filter(Boolean) as Date[];
+  }, []);
+
+  const calendarModifiers = useMemo(() => ({
+    expiration: drugExpirationDates,
+  }), [drugExpirationDates]);
+
+  const calendarModifiersClassNames = {
+    expiration: 'bg-destructive/20 text-destructive-foreground rounded-full',
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -101,7 +119,8 @@ export default function DashboardPage() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-[120px]" />)}
         </div>
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <Skeleton className="h-[380px]" />
           <Skeleton className="h-[380px]" />
           <Skeleton className="h-[380px]" />
         </div>
@@ -160,7 +179,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Donations Facilitated</CardTitle>
-            <Package className="h-5 w-5 text-muted-foreground" /> {/* Changed Icon to Package to match previous state */}
+            <Package className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{summaryStats.donationsFacilitated}</div>
@@ -169,8 +188,30 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"> {/* Adjusted grid for 3 columns on large screens */}
+        <Card className="lg:col-span-1"> {/* Calendar takes 1 span */}
+          <CardHeader>
+            <CardTitle>Events &amp; Reporting Calendar</CardTitle>
+            <CardDescription>Drug expirations &amp; date selection.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center">
+            <Calendar
+              mode="single"
+              selected={selectedCalendarDate}
+              onSelect={setSelectedCalendarDate}
+              modifiers={calendarModifiers}
+              modifiersClassNames={calendarModifiersClassNames}
+              className="rounded-md border"
+            />
+            {selectedCalendarDate && (
+              <p className="mt-4 text-sm text-muted-foreground">
+                Selected date for report: {format(selectedCalendarDate, "PPP")}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+        
+        <Card className="lg:col-span-1"> {/* Expiring Drugs Chart takes 1 span */}
           <CardHeader>
             <CardTitle>Drugs Expiring Soon</CardTitle>
             <CardDescription>Count of drugs by expiration window</CardDescription>
@@ -194,7 +235,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="lg:col-span-1"> {/* Inventory Chart takes 1 span */}
           <CardHeader>
             <CardTitle>Inventory by Category</CardTitle>
             <CardDescription>Distribution of drugs across categories</CardDescription>
@@ -241,3 +282,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+
