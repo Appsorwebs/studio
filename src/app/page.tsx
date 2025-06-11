@@ -7,14 +7,13 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { ArrowRight, PackageCheck, HandHeart, BarChartBig, Users, Pill } from 'lucide-react';
 import Image from 'next/image';
 import { AppFooter } from '@/components/layout/AppFooter';
-import { allMockDrugs } from '@/lib/mock-data'; // Import mock drug data
-import type { Drug } from '@/types'; // Import Drug type
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'; // Import Card components
+import { allMockDrugs } from '@/lib/mock-data';
+import type { Drug } from '@/types';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format, parseISO } from 'date-fns';
 
 export default function LandingPage() {
-  // Select a few drugs to feature, e.g., the first 3 available ones
   const featuredDrugs: Drug[] = allMockDrugs.filter(drug => drug.status === 'Available' || drug.status === 'Donated').slice(0, 3);
 
   return (
