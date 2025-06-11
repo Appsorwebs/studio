@@ -16,48 +16,37 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// This function needs to run *only on the client* to determine initial state.
-const getClientSideInitialState = (): { currentTheme: Theme; currentPreference: ThemePreference } => {
-  // If called on server (e.g. during SSR for initial useState value), return a default.
-  // This default should align with your non-JS fallback or initial CSS (usually light).
-  if (typeof window === 'undefined') {
-    return { currentTheme: 'light', currentPreference: 'system' }; 
-  }
-
-  const storedPreference = localStorage.getItem("theme") as ThemePreference | null;
-
-  if (storedPreference === "light" || storedPreference === "dark") {
-    return { currentTheme: storedPreference, currentPreference: storedPreference };
-  }
-  
-  // System preference or no preference stored (localStorage might have 'system' or be null)
-  const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  return { 
-    currentTheme: systemPrefersDark ? "dark" : "light", 
-    currentPreference: storedPreference === 'system' ? 'system' : 'system' 
-  };
-};
-
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  // Initialize state using a function that runs client-side for the initial value.
-  const [themeState, setThemeState] = useState(() => getClientSideInitialState());
+  // Initialize with a default that matches the :root CSS variables (light theme)
+  // The inline script in layout.tsx handles the very first paint.
+  // This useEffect will then sync React state and ensure consistency on the client.
+  const [themeState, setThemeState] = useState<{ currentTheme: Theme; currentPreference: ThemePreference }>({
+    currentTheme: 'light', // Default to light, inline script overrides initial paint
+    currentPreference: 'system',
+  });
   const [mounted, setMounted] = useState(false);
 
-  // Effect to mark as mounted and sync DOM class on initial client render.
-  // This also ensures the DOM class matches React state if inline script might have issues or wasn't present.
   useEffect(() => {
     setMounted(true);
-    // Re-evaluate on actual mount to ensure consistency, though useState initializer should be good.
-    const { currentTheme: initialDomTheme } = getClientSideInitialState(); 
-    
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(initialDomTheme);
-    
-    // If React's state is somehow different from what it should be on mount, sync it.
-    if (themeState.currentTheme !== initialDomTheme) {
-        setThemeState(getClientSideInitialState());
+
+    let storedPreference = localStorage.getItem("theme") as ThemePreference | null;
+    let resolvedTheme: Theme;
+    let resolvedPreference: ThemePreference;
+
+    if (storedPreference === "light" || storedPreference === "dark") {
+      resolvedTheme = storedPreference;
+      resolvedPreference = storedPreference;
+    } else { // 'system' or null (no preference means system)
+      const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      resolvedTheme = systemPrefersDark ? "dark" : "light";
+      resolvedPreference = 'system'; // If localStorage was null, it implies system preference.
+                                     // If it was 'system', it's explicitly system.
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    
+    setThemeState({ currentTheme: resolvedTheme, currentPreference: resolvedPreference });
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(resolvedTheme);
+
   }, []); // Run once on mount
 
   // Listener for system theme changes
@@ -67,9 +56,9 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     }
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = (e: MediaQueryListEvent) => {
-      const newSystemTheme = e.matches ? "dark" : "light";
-      // Only update if preference is still 'system'
+      // Only update if preference is still 'system' (user hasn't explicitly changed it)
       if (localStorage.getItem("theme") !== "light" && localStorage.getItem("theme") !== "dark") {
+        const newSystemTheme = e.matches ? "dark" : "light";
         setThemeState({ currentTheme: newSystemTheme, currentPreference: 'system' });
         document.documentElement.classList.remove('light', 'dark');
         document.documentElement.classList.add(newSystemTheme);
@@ -104,7 +93,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   const toggleTheme = useCallback(() => {
     const newThemeToApply = themeState.currentTheme === 'light' ? 'dark' : 'light';
-    updateThemeDOMAndStorage(newThemeToApply, newThemeToApply); // When toggling, it becomes an explicit choice
+    updateThemeDOMAndStorage(newThemeToApply, newThemeToApply);
   }, [themeState.currentTheme, updateThemeDOMAndStorage]);
 
   const contextValue = React.useMemo(() => ({
@@ -115,9 +104,6 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     toggleTheme
   }), [themeState.currentTheme, themeState.currentPreference, setTheme, setSystemTheme, toggleTheme]);
   
-  // The `SetInitialTheme` script in `layout.tsx` should handle the "no-flash" initial paint.
-  // This provider then syncs React state.
-  // `suppressHydrationWarning` on `<html>` and `<body>` helps React handle initial class mismatches.
   return (
     <ThemeContext.Provider value={contextValue}>
       {children}
