@@ -10,19 +10,27 @@ export const metadata: Metadata = {
   description: 'PharmaDrug Expiration Listing System',
 };
 
+// This script runs before React hydrates, attempting to set the theme ASAP
+// to minimize flashing. It prioritizes 'light' as the default.
 const SetInitialTheme = () => {
   const scriptContent = `
     (function() {
       var d=document.documentElement,c=d.classList;
       var themePreference;
-      try { themePreference = localStorage.getItem('theme'); } catch(e) {}
+      try { themePreference = localStorage.getItem('theme'); } catch(e) {} // Gracefully handle localStorage errors
 
       if (themePreference === 'dark') {
         c.add('dark');
-      } else if (themePreference === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        c.add('dark');
-      } else { // Covers 'light', null, undefined, invalid, or 'system' when system is light
-        c.remove('dark'); // Default to light
+      } else if (themePreference === 'light') {
+        c.remove('dark'); // Explicitly ensure light if 'light' is stored
+      } else if (themePreference === 'system') {
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          c.add('dark');
+        } else {
+          c.remove('dark'); // System is light
+        }
+      } else { // Default to light if no valid preference is stored (null, undefined, or invalid value)
+        c.remove('dark');
       }
     })();
   `;
@@ -52,4 +60,3 @@ export default function RootLayout({
     </html>
   );
 }
-

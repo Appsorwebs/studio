@@ -7,110 +7,113 @@ type Theme = "light" | "dark";
 type ThemePreference = "light" | "dark" | "system";
 
 interface ThemeContextType {
-  theme: Theme; 
-  preference: ThemePreference; 
-  setTheme: (newTheme: "light" | "dark") => void; 
-  setSystemTheme: () => void; 
-  toggleTheme: () => void; 
+  theme: Theme; // The resolved theme ('light' or 'dark')
+  preference: ThemePreference; // The user's selected preference ('light', 'dark', 'system')
+  setThemePreference: (newPreference: ThemePreference) => void;
+  toggleTheme: () => void; // Kept for convenience, switches between light/dark
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const getInitialResolvedTheme = (): Theme => {
-  if (typeof window === 'undefined') return 'light'; // SSR default
-  try {
-    const storedPreference = localStorage.getItem('theme') as ThemePreference | null;
-    if (storedPreference === 'dark') return 'dark';
-    if (storedPreference === 'light') return 'light';
-    if (storedPreference === 'system') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    // If localStorage is null, undefined, or any other invalid value, default to 'light'
-    return 'light';
-  } catch (e) {
-    return 'light'; // Fallback in case of localStorage error
-  }
-};
-
+// Function to get initial user preference from localStorage, defaulting to 'light'
 const getInitialUserPreference = (): ThemePreference => {
-  if (typeof window === 'undefined') return 'light'; // SSR default
+  if (typeof window === 'undefined') return 'light';
   try {
     const storedPreference = localStorage.getItem('theme') as ThemePreference | null;
-    // Check for valid stored preferences
     if (storedPreference === 'light' || storedPreference === 'dark' || storedPreference === 'system') {
       return storedPreference;
     }
-    // If localStorage is null, undefined, or any other invalid value, default preference to 'light'
-    return 'light';
+    return 'light'; // Default to 'light' if nothing valid is stored
   } catch (e) {
-    return 'light'; // Fallback
+    return 'light';
   }
 };
 
+// Function to get initial resolved theme based on preference
+const getInitialResolvedTheme = (preference: ThemePreference): Theme => {
+  if (typeof window === 'undefined') return 'light';
+  if (preference === 'dark') return 'dark';
+  if (preference === 'light') return 'light';
+  // preference is 'system'
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+};
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [theme, setThemeInternal] = useState<Theme>(getInitialResolvedTheme);
-  const [preference, setPreferenceInternal] = useState<ThemePreference>(getInitialUserPreference);
+  // Initialize state *after* ensuring window is defined for localStorage/matchMedia access
+  const [preference, setPreferenceInternal] = useState<ThemePreference>('light');
+  const [theme, setThemeInternal] = useState<Theme>('light');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    // This effect runs once on the client after mount
+    const initialPreference = getInitialUserPreference();
+    const initialResolvedTheme = getInitialResolvedTheme(initialPreference);
+
+    setPreferenceInternal(initialPreference);
+    setThemeInternal(initialResolvedTheme);
+    
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(initialResolvedTheme);
+    
+    setMounted(true); // Children can now be rendered
   }, []);
 
-  useEffect(() => {
-    if (mounted) {
-      document.documentElement.classList.remove('light', 'dark');
-      document.documentElement.classList.add(theme);
-    }
-  }, [theme, mounted]);
 
   useEffect(() => {
+    // This effect handles changes to system theme if 'system' preference is selected
     if (!mounted || preference !== 'system') {
       return;
     }
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
-      const newSystemTheme = e.matches ? 'dark' : 'light';
-      setThemeInternal(newSystemTheme); 
+      const newSystemResolvedTheme = e.matches ? 'dark' : 'light';
+      setThemeInternal(newSystemResolvedTheme);
+      document.documentElement.classList.remove('light', 'dark');
+      document.documentElement.classList.add(newSystemResolvedTheme);
     };
     mediaQuery.addEventListener('change', handleChange);
-    // Set initial theme based on system if preference is 'system' on mount
-    if (preference === 'system') {
-        setThemeInternal(mediaQuery.matches ? 'dark' : 'light');
-    }
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [mounted, preference]);
 
-  const setTheme = useCallback((newThemeChoice: 'light' | 'dark') => {
-    setPreferenceInternal(newThemeChoice); 
-    setThemeInternal(newThemeChoice);
-    try { localStorage.setItem('theme', newThemeChoice); } catch(e){}
-  }, []);
 
-  const setSystemTheme = useCallback(() => {
-    setPreferenceInternal('system'); 
-    try { localStorage.setItem('theme', 'system'); } catch(e){}
-    // Check and apply system theme immediately upon choosing 'system'
-    if (typeof window !== 'undefined') {
-        const newResolvedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        setThemeInternal(newResolvedTheme);
+  const setThemePreference = useCallback((newPreference: ThemePreference) => {
+    setPreferenceInternal(newPreference);
+    try { localStorage.setItem('theme', newPreference); } catch(e) {}
+    
+    let newResolvedTheme: Theme;
+    if (newPreference === 'dark') {
+      newResolvedTheme = 'dark';
+    } else if (newPreference === 'light') {
+      newResolvedTheme = 'light';
+    } else { // 'system'
+      newResolvedTheme = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    setThemeInternal(newResolvedTheme);
+    
+    if (typeof document !== 'undefined') {
+      document.documentElement.classList.remove('light', 'dark');
+      document.documentElement.classList.add(newResolvedTheme);
     }
   }, []);
 
   const toggleTheme = useCallback(() => {
+    // Toggles between explicit light and dark, updating preference
     const newThemeToApply = theme === 'light' ? 'dark' : 'light';
-    setPreferenceInternal(newThemeToApply);
-    setThemeInternal(newThemeToApply);
-    try { localStorage.setItem('theme', newThemeToApply); } catch(e){}
-  }, [theme]);
+    setThemePreference(newThemeToApply);
+  }, [theme, setThemePreference]);
   
   const contextValue = React.useMemo(() => ({
     theme,
     preference,
-    setTheme,
-    setSystemTheme,
+    setThemePreference,
     toggleTheme
-  }), [theme, preference, setTheme, setSystemTheme, toggleTheme]);
+  }), [theme, preference, setThemePreference, toggleTheme]);
+  
+  // Delay rendering children until the theme is resolved on the client
+  // This is crucial to prevent content flashing with the wrong theme
+  if (!mounted) {
+    return null;
+  }
   
   return (
     <ThemeContext.Provider value={contextValue}>
@@ -126,4 +129,3 @@ export const useThemeContext = () => {
   }
   return context;
 };
-
