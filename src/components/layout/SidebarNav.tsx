@@ -11,7 +11,6 @@ import {
   Search,
   Gift,
   MessageSquare,
-  Cpu,
   Users,
   Settings,
   Info,
@@ -36,7 +35,6 @@ const navItems = [
       { href: "/inventory/add", label: "Add New Drug", icon: PlusCircle },
     ]
   },
-  { href: "/predict", label: "Predict Expiration", icon: Cpu },
   { href: "/search", label: "Search Drugs", icon: Search },
   { href: "/donations", label: "Drug Donations", icon: Gift },
   { href: "/contact", label: "Contact Us", icon: MessageSquare },

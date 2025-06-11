@@ -3,30 +3,23 @@
 
 import { z } from "zod";
 import type { Drug } from "@/types";
-import { predictExpirationDate } from "@/ai/flows/predict-expiration-date";
 
 const DrugSchema = z.object({
   name: z.string().min(1, "Drug name is required"),
   dosage: z.string().min(1, "Dosage is required"),
   manufacturer: z.string().min(1, "Manufacturer is required"),
-  expirationDate: z.string().optional(), // Can be predicted
+  expirationDate: z.string().min(1, "Expiration date is required"), 
   category: z.string().optional(),
   quantity: z.coerce.number().min(0, "Quantity must be non-negative").optional(),
   storageConditions: z.string().optional(),
   manufacturingDate: z.string().optional(), // YYYY-MM-DD format
   notes: z.string().optional(),
-  predictExpiry: z.boolean().optional(),
 });
 
 export type AddDrugFormState = {
   message: string;
   fields?: Record<string, string>;
   drug?: Drug;
-  prediction?: {
-    predictedExpirationDate: string;
-    confidenceLevel: string;
-    reasoning: string;
-  };
   isError: boolean;
 };
 
@@ -38,7 +31,7 @@ async function saveDrugToDatabase(drugData: Omit<Drug, 'id' | 'listedDate'>): Pr
     id: Math.random().toString(36).substr(2, 9),
     ...drugData,
     listedDate: new Date().toISOString(),
-    status: drugData.status || 'Available',
+    status: drugData.status || 'Available', // Default status
   };
 }
 
@@ -47,7 +40,6 @@ export async function addDrugAction(
   prevState: AddDrugFormState | undefined,
   formData: FormData
 ): Promise<AddDrugFormState> {
-  const predictExpiry = formData.get("predictExpiry") === "on";
   
   const drugData = {
     name: formData.get("name") as string,
@@ -59,7 +51,6 @@ export async function addDrugAction(
     storageConditions: formData.get("storageConditions") as string | undefined,
     manufacturingDate: formData.get("manufacturingDate") as string | undefined,
     notes: formData.get("notes") as string | undefined,
-    predictExpiry: predictExpiry,
   };
 
   const validatedFields = DrugSchema.safeParse(drugData);
@@ -71,59 +62,22 @@ export async function addDrugAction(
       isError: true,
     };
   }
-
-  const { predictExpiry: shouldPredict, ...dataToSave } = validatedFields.data;
-
-  let finalDrugData: Omit<Drug, 'id' | 'listedDate'> = { ...dataToSave, status: 'Available' };
-  let predictionResult;
-
-  if (shouldPredict) {
-    if (!dataToSave.manufacturingDate || !dataToSave.storageConditions) {
-      return {
-        message: "Manufacturing date and storage conditions are required for AI prediction.",
-        fields: {
-          ...( !dataToSave.manufacturingDate && { manufacturingDate: "Required for prediction" }),
-          ...( !dataToSave.storageConditions && { storageConditions: "Required for prediction" }),
-        },
-        isError: true,
-      };
-    }
-    try {
-      predictionResult = await predictExpirationDate({
-        drugName: dataToSave.name,
-        dosage: dataToSave.dosage,
-        manufacturer: dataToSave.manufacturer,
-        storageConditions: dataToSave.storageConditions,
-        manufacturingDate: dataToSave.manufacturingDate, // Assuming YYYY-MM-DD string
-        additionalNotes: dataToSave.notes,
-      });
-      
-      finalDrugData.expirationDate = predictionResult.predictedExpirationDate; // Use AI predicted date
-      finalDrugData.aiPredictedExpirationDate = predictionResult.predictedExpirationDate;
-      finalDrugData.status = 'Pending Prediction'; // Or 'Available with AI date'
-
-    } catch (error) {
-      console.error("AI Prediction Error:", error);
-      return {
-        message: "AI prediction failed. Please try again or enter manually.",
-        isError: true,
-      };
-    }
-  } else if (!dataToSave.expirationDate) {
-     return {
-        message: "Expiration date is required if not using AI prediction.",
-        fields: { expirationDate: "Expiration date is required" },
-        isError: true,
-      };
+  
+  if (!validatedFields.data.expirationDate) {
+    return {
+       message: "Expiration date is required.",
+       fields: { expirationDate: "Expiration date is required" },
+       isError: true,
+     };
   }
 
+  const finalDrugData: Omit<Drug, 'id' | 'listedDate'> = { ...validatedFields.data, status: 'Available' };
 
   try {
     const savedDrug = await saveDrugToDatabase(finalDrugData);
     return {
-      message: `Drug "${savedDrug.name}" added successfully. ${predictionResult ? 'AI prediction completed.' : ''}`,
+      message: `Drug "${savedDrug.name}" added successfully.`,
       drug: savedDrug,
-      ...(predictionResult && { prediction: predictionResult }),
       isError: false,
     };
   } catch (error) {

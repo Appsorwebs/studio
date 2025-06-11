@@ -26,7 +26,7 @@ const mockDrugs: Drug[] = [
   { id: "3", name: "Lisinopril", dosage: "10mg", manufacturer: "AstraZeneca", expirationDate: "2024-06-30", category: "Antihypertensive", quantity: 50, status: "Available", listedDate: "2023-03-10", manufacturingDate: "2022-06-01", storageConditions: "Protect from light"  },
   { id: "4", name: "Metformin", dosage: "850mg", manufacturer: "Merck", expirationDate: "2026-01-20", category: "Antidiabetic", quantity: 120, status: "Donated", listedDate: "2023-04-05", manufacturingDate: "2023-01-01", storageConditions: "Room temperature"  },
   { id: "5", name: "Atorvastatin", dosage: "20mg", manufacturer: "Pfizer", expirationDate: "2023-05-01", category: "Cholesterol", quantity: 0, status: "Expired", listedDate: "2022-11-01", manufacturingDate: "2021-05-01", storageConditions: "Room temperature"  },
-  { id: "6", name: "Salbutamol Inhaler", dosage: "100mcg", manufacturer: "Cipla", expirationDate: "2024-07-22", category: "Respiratory", quantity: 75, status: "Available", listedDate: "2023-01-25", aiPredictedExpirationDate: "2024-07-20", manufacturingDate: "2023-01-01", storageConditions: "Store below 25°C"  },
+  { id: "6", name: "Salbutamol Inhaler", dosage: "100mcg", manufacturer: "Cipla", expirationDate: "2024-07-22", category: "Respiratory", quantity: 75, status: "Available", listedDate: "2023-01-25", manufacturingDate: "2023-01-01", storageConditions: "Store below 25°C"  },
 ];
 
 export function DrugTable() {
@@ -46,10 +46,10 @@ export function DrugTable() {
   const getStatusBadgeVariant = (status: Drug['status'], expirationDate: string) => {
     const daysToExpire = differenceInDays(parseISO(expirationDate), new Date());
     if (status === 'Expired' || daysToExpire < 0) return "destructive";
-    if (status === 'Donated') return "default"; // Primary color for donated
-    if (daysToExpire <= 30) return "secondary"; // Muted variant for warning
-    if (status === 'Pending Prediction') return "outline";
-    return "default"; // Accent or a success-like color for Available
+    if (status === 'Donated') return "default"; 
+    if (daysToExpire <= 30) return "secondary"; 
+    if (status === 'Pending Prediction') return "outline"; // Kept for type consistency, though AI is removed
+    return "default"; 
   };
 
   const getStatusText = (status: Drug['status'], expirationDate: string) => {
@@ -107,7 +107,6 @@ export function DrugTable() {
             <TableHead className="hidden md:table-cell">Manufacturer</TableHead>
             <TableHead>Dosage</TableHead>
             <TableHead>Expiration Date</TableHead>
-            <TableHead className="hidden lg:table-cell">AI Predicted</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -119,7 +118,6 @@ export function DrugTable() {
               <TableCell className="hidden md:table-cell">{drug.manufacturer}</TableCell>
               <TableCell>{drug.dosage}</TableCell>
               <TableCell>{format(parseISO(drug.expirationDate), "MMM dd, yyyy")}</TableCell>
-              <TableCell className="hidden lg:table-cell">{drug.aiPredictedExpirationDate ? format(parseISO(drug.aiPredictedExpirationDate), "MMM dd, yyyy") : 'N/A'}</TableCell>
               <TableCell>
                 <Badge variant={getStatusBadgeVariant(drug.status, drug.expirationDate)}>
                   {getStatusText(drug.status, drug.expirationDate)}

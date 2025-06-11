@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import Logo from '@/components/Logo';
 import SpinnerLogo from '@/components/SpinnerLogo';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { ArrowRight, PackageCheck, Cpu, HandHeart, BarChartBig, Users } from 'lucide-react';
+import { ArrowRight, PackageCheck, HandHeart, BarChartBig, Users } from 'lucide-react';
 import Image from 'next/image';
 import { AppFooter } from '@/components/layout/AppFooter';
 
@@ -37,7 +37,7 @@ export default function LandingPage() {
               Smart Solutions for <span className="text-primary">Drug Expiration</span> Management
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10">
-              Rxpiration Alert helps pharmacies, hospitals, and organizations reduce waste, optimize inventory, and improve medication accessibility through AI-powered insights and a collaborative platform.
+              Rxpiration Alert helps pharmacies, hospitals, and organizations reduce waste, optimize inventory, and improve medication accessibility through a collaborative platform.
             </p>
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
               <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
@@ -64,7 +64,6 @@ export default function LandingPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[
                 { icon: PackageCheck, title: "Inventory Optimization", description: "Manage drug listings efficiently, track expiration dates, and reduce waste." },
-                { icon: Cpu, title: "AI-Powered Predictions", description: "Leverage AI to predict drug expiration dates with greater accuracy." },
                 { icon: HandHeart, title: "Facilitate Donations", description: "Easily connect with charities to donate surplus medications." },
                 { icon: BarChartBig, title: "Data Analytics", description: "Gain insights from comprehensive reports on trends and inventory levels." },
                 { icon: Users, title: "Seamless Collaboration", description: "Communicate effectively between pharmacists, patients, and organizations." },
@@ -93,7 +92,6 @@ export default function LandingPage() {
               <Image 
                 src="https://placehold.co/1200x600.png" 
                 alt="Rxpiration Alert Dashboard Mockup"
-                data-ai-hint="intuitive workflow" 
                 width={1200} 
                 height={600} 
                 className="rounded-xl shadow-2xl mx-auto"

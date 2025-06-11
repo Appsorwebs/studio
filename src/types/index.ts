@@ -11,7 +11,6 @@ export interface Drug {
   manufacturingDate?: string; // ISO string or Date
   listedDate?: string; // ISO string or Date
   status?: 'Available' | 'Donated' | 'Expired' | 'Pending Prediction';
-  aiPredictedExpirationDate?: string;
   notes?: string;
 }
 
@@ -26,21 +25,6 @@ export interface Charity {
   description: string;
   status: 'Active' | 'Inactive'; // Or other relevant statuses
   neededItems?: string[];
-}
-
-export interface PredictionRequest {
-  drugName: string;
-  dosage: string;
-  manufacturer: string;
-  storageConditions: string;
-  manufacturingDate: string; // YYYY-MM-DD
-  additionalNotes?: string;
-}
-
-export interface PredictionResult {
-  predictedExpirationDate: string; // YYYY-MM-DD or similar
-  confidenceLevel: string; // e.g., High, Moderate, Low
-  reasoning: string;
 }
 
 export interface PharmacistProfile {

@@ -9,14 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Loader2, CheckCircle, AlertCircle, Info } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -36,7 +34,6 @@ export function AddDrugForm() {
 
   const [manufacturingDate, setManufacturingDate] = useState<Date | undefined>();
   const [expirationDate, setExpirationDate] = useState<Date | undefined>();
-  const [predictExpiry, setPredictExpiry] = useState(false);
 
   useEffect(() => {
     if (state?.message) {
@@ -49,7 +46,6 @@ export function AddDrugForm() {
         formRef.current?.reset();
         setManufacturingDate(undefined);
         setExpirationDate(undefined);
-        setPredictExpiry(false);
       }
     }
   }, [state, toast]);
@@ -100,22 +96,7 @@ export function AddDrugForm() {
               {state?.fields?.storageConditions && <p className="text-sm text-destructive mt-1">{state.fields.storageConditions}</p>}
             </div>
           </div>
-          
-          <div className="items-top flex space-x-2 mt-4">
-            <Checkbox id="predictExpiry" name="predictExpiry" checked={predictExpiry} onCheckedChange={(checked) => setPredictExpiry(checked as boolean)} />
-            <div className="grid gap-1.5 leading-none">
-              <label
-                htmlFor="predictExpiry"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Predict Expiration Date using AI
-              </label>
-              <p className="text-sm text-muted-foreground">
-                If checked, manufacturing date and storage conditions are required. The system will attempt to predict the expiration date.
-              </p>
-            </div>
-          </div>
-          
+                    
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Label htmlFor="manufacturingDate">Manufacturing Date</Label>
@@ -145,35 +126,33 @@ export function AddDrugForm() {
               {state?.fields?.manufacturingDate && <p className="text-sm text-destructive mt-1">{state.fields.manufacturingDate}</p>}
             </div>
             
-            {!predictExpiry && (
-              <div>
-                <Label htmlFor="expirationDate">Expiration Date</Label>
-                 <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !expirationDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {expirationDate ? format(expirationDate, "PPP") : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={expirationDate}
-                      onSelect={setExpirationDate}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <Input type="hidden" name="expirationDate" value={expirationDate ? format(expirationDate, "yyyy-MM-dd") : ""} />
-                {state?.fields?.expirationDate && <p className="text-sm text-destructive mt-1">{state.fields.expirationDate}</p>}
-              </div>
-            )}
+            <div>
+              <Label htmlFor="expirationDate">Expiration Date</Label>
+               <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !expirationDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {expirationDate ? format(expirationDate, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={expirationDate}
+                    onSelect={setExpirationDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <Input type="hidden" name="expirationDate" value={expirationDate ? format(expirationDate, "yyyy-MM-dd") : ""} />
+              {state?.fields?.expirationDate && <p className="text-sm text-destructive mt-1">{state.fields.expirationDate}</p>}
+            </div>
           </div>
 
           <div>
@@ -183,17 +162,6 @@ export function AddDrugForm() {
 
           <SubmitButton />
         </form>
-         {state?.prediction && (
-          <Alert variant="default" className="mt-6 bg-accent/30">
-            <Info className="h-4 w-4 text-accent-foreground" />
-            <AlertTitle className="font-headline">AI Prediction Result</AlertTitle>
-            <AlertDescription>
-              <p><strong>Predicted Expiration Date:</strong> {state.prediction.predictedExpirationDate}</p>
-              <p><strong>Confidence:</strong> {state.prediction.confidenceLevel}</p>
-              <p><strong>Reasoning:</strong> {state.prediction.reasoning}</p>
-            </AlertDescription>
-          </Alert>
-        )}
       </CardContent>
     </Card>
   );
