@@ -48,7 +48,6 @@ export function DrugTable() {
     if (status === 'Expired' || daysToExpire < 0) return "destructive";
     if (status === 'Donated') return "default"; 
     if (daysToExpire <= 30) return "secondary"; 
-    if (status === 'Pending Prediction') return "outline"; // Kept for type consistency, though AI is removed
     return "default"; 
   };
 
@@ -85,7 +84,7 @@ export function DrugTable() {
               <Button variant="outline">Filter by Status: {filterStatus}</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {['All', 'Available', 'Donated', 'Expired', 'Pending Prediction'].map((status) => (
+              {['All', 'Available', 'Donated', 'Expired'].map((status) => (
                 <DropdownMenuItem key={status} onSelect={() => setFilterStatus(status as Drug['status'] | 'All')}>
                   {status}
                 </DropdownMenuItem>
