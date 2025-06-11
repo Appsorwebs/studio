@@ -155,7 +155,7 @@ export default function LandingPage() {
                 width={1200} 
                 height={600} 
                 className="rounded-xl shadow-2xl mx-auto"
-                data-ai-hint="dashboard mockup"
+                data-ai-hint="UI dashboard"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-xl"></div>
                <div className="absolute bottom-8 left-8 right-8 text-center md:text-left">
