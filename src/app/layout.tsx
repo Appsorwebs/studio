@@ -19,18 +19,10 @@ const SetInitialTheme = () => {
 
       if (themePreference === 'dark') {
         c.add('dark');
-      } else if (themePreference === 'light') {
-        c.remove('dark'); // Explicitly light
-      } else if (themePreference === 'system') {
-        // If 'system', check system preference
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-          c.add('dark');
-        } else {
-          c.remove('dark'); // System is light or doesn't support media query
-        }
-      } else {
-        // No valid preference (null, empty, or garbage value), default to light
-        c.remove('dark');
+      } else if (themePreference === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        c.add('dark');
+      } else { // Covers 'light', null, undefined, invalid, or 'system' when system is light
+        c.remove('dark'); // Default to light
       }
     })();
   `;
@@ -60,3 +52,4 @@ export default function RootLayout({
     </html>
   );
 }
+
