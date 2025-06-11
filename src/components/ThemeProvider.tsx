@@ -14,99 +14,78 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// This function runs ONLY on the client, after mount
-const getInitialClientStates = (): { theme: Theme; preference: ThemePreference } => {
-  let storedPreference: ThemePreference = 'light'; // Default preference is light
-
-  try {
-    const lsPreference = localStorage.getItem('theme') as ThemePreference | null;
-    if (lsPreference === 'light' || lsPreference === 'dark' || lsPreference === 'system') {
-      storedPreference = lsPreference;
-    } else {
-      // If no valid preference or an invalid one, default to 'light' and clear storage
-      localStorage.removeItem('theme');
-    }
-  } catch (e) { /* localStorage access might be restricted */ }
-
-  let resolvedTheme: Theme;
-  if (storedPreference === 'dark') {
-    resolvedTheme = 'dark';
-  } else if (storedPreference === 'light') {
-    resolvedTheme = 'light';
-  } else { // 'system'
-    resolvedTheme = (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+// Helper function to get initial preference (runs client-side)
+const getInitialPreference = (): ThemePreference => {
+  if (typeof window === 'undefined') {
+    return 'light'; // Default for SSR, will be corrected by inline script + client hydration
   }
-  return { theme: resolvedTheme, preference: storedPreference };
+  try {
+    const storedPref = localStorage.getItem('theme') as ThemePreference | null;
+    if (storedPref && ['light', 'dark', 'system'].includes(storedPref)) {
+      return storedPref;
+    }
+  } catch (e) {
+    // Ignore localStorage errors (e.g., in private browsing)
+  }
+  return 'light'; // Default to 'light' if no valid preference found or 'system' is implicitly default
 };
 
+// Helper function to resolve theme based on preference (runs client-side)
+const calculateResolvedTheme = (pref: ThemePreference): Theme => {
+  if (typeof window === 'undefined') {
+    return 'light'; // SSR default
+  }
+  if (pref === 'dark') return 'dark';
+  if (pref === 'light') return 'light';
+  // For 'system'
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+};
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  // Initialize with light theme for SSR to match the default expectation.
-  // The actual theme will be determined on the client.
-  const [preference, setPreferenceInternal] = useState<ThemePreference>('light');
-  const [theme, setThemeInternal] = useState<Theme>('light');
-  const [mounted, setMounted] = useState(false);
+  // Initialize state with functions that run on the client during the initial render.
+  // This ensures React's state aligns with what the inline script in layout.tsx might have set.
+  const [preference, setPreferenceInternal] = useState<ThemePreference>(getInitialPreference);
+  const [resolvedTheme, setResolvedThemeInternal] = useState<Theme>(() => calculateResolvedTheme(getInitialPreference()));
 
+  // Effect to apply theme to DOM and handle system changes
   useEffect(() => {
-    // This effect runs once on the client after the component mounts.
-    const { theme: initialTheme, preference: initialPreference } = getInitialClientStates();
-    
-    setPreferenceInternal(initialPreference);
-    setThemeInternal(initialTheme);
+    const currentResolved = calculateResolvedTheme(preference);
+    setResolvedThemeInternal(currentResolved); // Update React's understanding of the resolved theme
 
-    // Ensure DOM class matches the determined initial theme
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(initialTheme);
-    
-    setMounted(true); // Now safe to render children
+    // Apply to DOM
+    const root = document.documentElement;
+    root.classList.remove('light', 'dark'); // Clean slate
+    root.classList.add(currentResolved);   // Add the correct one
+
+    // System theme listener
+    if (preference === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = (e: MediaQueryListEvent) => {
+        const newSystemResolvedTheme = e.matches ? 'dark' : 'light';
+        setResolvedThemeInternal(newSystemResolvedTheme);
+        root.classList.remove('light', 'dark');
+        root.classList.add(newSystemResolvedTheme);
+      };
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+  }, [preference]); // Re-run when user preference changes
+
+  const setThemePreference = useCallback((newPref: ThemePreference) => {
+    setPreferenceInternal(newPref);
+    try {
+      localStorage.setItem('theme', newPref);
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+    // The useEffect hook will handle applying the change to the DOM and React state.
   }, []);
-
-  useEffect(() => {
-    // Handles system theme changes if 'system' preference is selected
-    if (!mounted || preference !== 'system') {
-      return;
-    }
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e: MediaQueryListEvent) => {
-      const newSystemResolvedTheme = e.matches ? 'dark' : 'light';
-      setThemeInternal(newSystemResolvedTheme);
-      document.documentElement.classList.remove('light', 'dark');
-      document.documentElement.classList.add(newSystemResolvedTheme);
-    };
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [mounted, preference]);
-
-  const setThemePreference = useCallback((newPreference: ThemePreference) => {
-    if (!mounted) return; // Don't allow changes until mounted and initial theme is set
-
-    setPreferenceInternal(newPreference);
-    try { localStorage.setItem('theme', newPreference); } catch(e) {/* ignore */}
-    
-    let newResolvedTheme: Theme;
-    if (newPreference === 'dark') {
-      newResolvedTheme = 'dark';
-    } else if (newPreference === 'light') {
-      newResolvedTheme = 'light';
-    } else { // 'system'
-      newResolvedTheme = (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
-    }
-    setThemeInternal(newResolvedTheme);
-    document.documentElement.classList.remove('light', 'dark'); // Ensure only one class or none
-    document.documentElement.classList.add(newResolvedTheme);
-  }, [mounted]);
   
   const contextValue = React.useMemo(() => ({
-    theme,
+    theme: resolvedTheme,
     preference,
     setThemePreference,
-  }), [theme, preference, setThemePreference]);
-  
-  // Prevent rendering children until the theme is resolved on the client
-  // This is crucial for preventing the flash of incorrectly styled content
-  if (!mounted) {
-    return null; // Or a global loading spinner, but null is best for theme
-  }
+  }), [resolvedTheme, preference, setThemePreference]);
   
   return (
     <ThemeContext.Provider value={contextValue}>
