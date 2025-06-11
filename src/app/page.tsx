@@ -160,7 +160,7 @@ export default function LandingPage() {
                <div className="absolute bottom-8 left-8 right-8 text-center md:text-left">
                 <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">Intuitive Dashboard. Powerful Insights.</h3>
                 <p className="text-md md:text-lg text-gray-200 max-w-xl">
-                  Visualize your data, track key metrics, and make informed decisions with our user-friendly interface.
+                  Visualize your data, track key metrics, and make informed decisions with our user-friendly interface that works.
                 </p>
               </div>
             </div>
