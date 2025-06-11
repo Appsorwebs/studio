@@ -53,8 +53,6 @@ export default function SignupPage() {
           duration: 7000, 
         });
         (event.target as HTMLFormElement).reset(); 
-        // In a real app, you might redirect to login or dashboard after a short delay
-        // For now, we just inform the user.
       } else {
         let errorMessages = result.message || "An error occurred during signup.";
         if (result.errors) {
@@ -135,14 +133,12 @@ export default function SignupPage() {
                 <ul className="list-disc list-inside ml-4 my-2 space-y-1">
                   <li>
                     <strong>Monthly Plan:</strong> N5,000
-                    {/* Link could be activated post-trial <a href={paystackMonthlyLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">(Pay Monthly)</a> */}
                   </li>
                   <li>
-                    <strong>Yearly Plan:</strong> N100,000 - Best value for uninterrupted long-term access.
-                    {/* Link could be activated post-trial <a href={paystackYearlyLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">(Pay Yearly)</a> */}
+                    <strong>Yearly Plan:</strong> N100,000 - Secure a full year of uninterrupted access.
                   </li>
                 </ul>
-                <p className="text-sm text-muted-foreground">You'll be reminded to choose a plan before your trial ends. Payments will be processed securely via Paystack.</p>
+                <p className="text-sm text-muted-foreground">You'll be reminded to choose a plan before your trial ends. Payments are processed via Paystack: <a href={paystackMonthlyLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Monthly</a> / <a href={paystackYearlyLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Yearly</a>.</p>
               </AlertDescription>
             </Alert>
             

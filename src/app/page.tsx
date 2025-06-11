@@ -20,7 +20,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-4">
             <ThemeToggle />
             <Button asChild variant="outline">
-              <Link href="/signup">Login / Sign Up</Link>
+              <Link href="/login">Login / Sign Up</Link>
             </Button>
           </div>
         </div>
