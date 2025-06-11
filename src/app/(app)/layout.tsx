@@ -20,7 +20,7 @@ export default function AppLayout({
 }) {
   return (
     <SidebarProvider defaultOpen>
-      <div className="flex min-h-screen w-full flex-col">
+      <div className="flex min-h-screen w-full"> {/* Changed from flex-col to flex (row) */}
         <Sidebar variant="sidebar" collapsible="icon" side="left" className="border-r">
           <SidebarHeader className="p-4 items-center justify-center group-data-[collapsible=icon]:hidden">
             <Link href="/dashboard">
@@ -37,11 +37,12 @@ export default function AppLayout({
           </SidebarContent>
           <SidebarRail />
         </Sidebar>
-        <SidebarInset className="flex flex-col">
+        <SidebarInset className="flex flex-col flex-1"> {/* Added flex-1 */}
           <AppHeader />
-          <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+          {/* Changed nested <main> to <div> as SidebarInset is already <main> */}
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
             {children}
-          </main>
+          </div>
           <AppFooter />
         </SidebarInset>
       </div>
