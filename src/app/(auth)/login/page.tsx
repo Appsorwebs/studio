@@ -11,6 +11,8 @@ import Logo from '@/components/Logo';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LogIn, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { authClient } from '@/lib/firebase/client'; // Import Firebase auth client
+import { signInWithEmailAndPassword, AuthError } from 'firebase/auth';
 // import { useRouter } from 'next/navigation'; // Uncomment if redirecting after login
 
 export default function LoginPage() {
@@ -23,44 +25,48 @@ export default function LoginPage() {
     setIsLoading(true);
 
     const formData = new FormData(event.currentTarget);
-    const data = {
-      email: formData.get("email") as string,
-      password: formData.get("password") as string,
-    };
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+      const userCredential = await signInWithEmailAndPassword(authClient, email, password);
+      // Signed in 
+      const user = userCredential.user;
+      console.log("Firebase login successful, user:", user);
 
-      const result = await response.json();
-
-      if (response.ok) {
-        toast({
-          title: "Login Successful! 🎉",
-          description: result.message || "Welcome back! Redirecting to dashboard...",
-          variant: "default",
-          duration: 5000,
-        });
-        (event.target as HTMLFormElement).reset();
-        // Simulate redirection or actual redirection
-        // router.push('/dashboard'); // Example: Redirect to dashboard
-      } else {
-        toast({
-          title: "Login Failed",
-          description: result.message || "Invalid credentials or an error occurred.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Login form submission error:", error);
       toast({
-        title: "Network Error",
-        description: "Could not reach the server. Please check your connection.",
+        title: "Login Successful! 🎉",
+        description: `Welcome back, ${user.email}!`, // You can customize this
+        variant: "default",
+        duration: 5000,
+      });
+      (event.target as HTMLFormElement).reset();
+      // TODO: Implement session creation with backend and redirect
+      // For now, user is logged in on Firebase client, but no server session yet.
+      // router.push('/dashboard'); 
+
+    } catch (error) {
+      const authError = error as AuthError;
+      console.error("Firebase login error:", authError);
+      let errorMessage = "An unknown error occurred during login.";
+      switch (authError.code) {
+        case 'auth/invalid-email':
+          errorMessage = "Invalid email address format.";
+          break;
+        case 'auth/user-disabled':
+          errorMessage = "This user account has been disabled.";
+          break;
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential': // Covers user not found and wrong password for newer SDKs
+          errorMessage = "Invalid email or password.";
+          break;
+        default:
+          errorMessage = authError.message || "Failed to log in. Please try again.";
+      }
+      toast({
+        title: "Login Failed",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
