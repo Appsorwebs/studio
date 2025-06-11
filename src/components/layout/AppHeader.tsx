@@ -51,7 +51,8 @@ export function AppHeader() {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/login"> {/* Simulates logout by going to login page */}
+                {/* Link to the logout API endpoint */}
+                <Link href="/api/auth/logout" prefetch={false}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </Link>
