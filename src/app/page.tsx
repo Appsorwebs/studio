@@ -147,16 +147,7 @@ export default function LandingPage() {
                 Visualize your data, track key metrics, and make informed decisions with our user-friendly interface.
               </p>
             </div>
-            <div className="relative">
-              <Image 
-                src="https://placehold.co/1200x600.png" 
-                alt="Rxpiration Alert Dashboard Mockup"
-                width={1200} 
-                height={600} 
-                className="rounded-xl shadow-2xl mx-auto"
-                data-ai-hint="UI dashboard"
-              />
-            </div>
+            {/* Image was here, now removed */}
           </div>
         </section>
 
