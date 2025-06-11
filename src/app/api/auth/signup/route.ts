@@ -2,6 +2,8 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { authAdmin, firestoreAdmin } from '@/lib/firebase/admin';
+import { addMonths, formatISO } from 'date-fns';
 
 // Schema for validating pharmacist signup data
 const PharmacistSignupSchema = z.object({
@@ -29,29 +31,81 @@ export async function POST(request: NextRequest) {
 
     const { firstName, lastName, pharmacyName, email, password, nigeriaPhoneNumber, pharmacyAddress } = validation.data;
 
-    // **MOCK IMPLEMENTATION STARTS HERE**
-    // In a real application, you would:
-    // 1. Hash the password securely (e.g., using bcrypt).
-    // 2. Check if the email or pharmacyName (username) already exists in your database.
-    // 3. Save the new pharmacist user to your database, including a trial start/end date.
-    // 4. Potentially create a session or JWT for authentication.
+    // Check if user with this email already exists in Firebase Auth
+    try {
+      await authAdmin.getUserByEmail(email);
+      return NextResponse.json({ 
+        message: 'An account with this email address already exists.',
+      }, { status: 409 }); // 409 Conflict
+    } catch (error: any) {
+      if (error.code !== 'auth/user-not-found') {
+        // Some other error occurred while checking email
+        console.error("Error checking existing email:", error);
+        return NextResponse.json({ message: 'Error verifying email. Please try again.' }, { status: 500 });
+      }
+      // If 'auth/user-not-found', it means email is available, proceed.
+    }
+    
+    // Future enhancement: Check if pharmacyName (username) is unique in Firestore
+    // This would involve a query to the 'pharmacists' collection.
+    // For simplicity in this step, we'll omit this check.
 
-    console.log("Received pharmacist signup data:", validation.data);
-    console.log("Simulating password hashing for:", password.substring(0,2) + "..."); 
-    console.log(`Simulating saving user ${pharmacyName} to database with a 1-month free trial...`);
+    let newUserRecord;
+    try {
+      newUserRecord = await authAdmin.createUser({
+        email: email,
+        password: password,
+        displayName: `${firstName} ${lastName} (${pharmacyName})`, // Firebase Auth display name
+        emailVerified: false, // You might want to implement email verification later
+      });
+    } catch (error: any) {
+      console.error("Error creating user in Firebase Auth:", error);
+      let publicMessage = "Failed to create user account.";
+      if (error.code === 'auth/email-already-exists') { // Should have been caught above, but as a safeguard
+        publicMessage = "An account with this email address already exists.";
+         return NextResponse.json({ message: publicMessage }, { status: 409 });
+      } else if (error.code === 'auth/invalid-password') {
+        publicMessage = "Password is not strong enough. It must be at least 6 characters long.";
+         return NextResponse.json({ message: publicMessage, errors: { password: [publicMessage]} }, { status: 400 });
+      }
+      return NextResponse.json({ message: publicMessage }, { status: 500 });
+    }
 
-    // Simulate a delay for database operation
-    await new Promise(resolve => setTimeout(resolve, 500));
+    const userId = newUserRecord.uid;
+    const currentDate = new Date();
+    const trialEndDate = addMonths(currentDate, 1);
 
-    console.log("User successfully (simulated) created.");
-    // **MOCK IMPLEMENTATION ENDS HERE**
+    const pharmacistProfileData = {
+      userId: userId, // Storing the auth UID
+      firstName,
+      lastName,
+      pharmacyName, // This is also the username
+      email,
+      nigeriaPhoneNumber,
+      pharmacyAddress,
+      memberSince: formatISO(currentDate),
+      trialEndDate: formatISO(trialEndDate),
+      subscriptionStatus: 'Trial Active', // Default status on signup
+      subscriptionTier: 'N/A', // N/A during trial
+      // socialMediaLinks and websiteLink can be added/updated by user later
+    };
 
-    // After successful user creation (simulated), the user gets a 1-month free trial.
-    // Payment processing would happen later, when the trial is about to expire or if the user chooses to subscribe earlier.
+    try {
+      // Use the Firebase Auth UID as the document ID in Firestore for easy linking
+      await firestoreAdmin.collection('pharmacists').doc(userId).set(pharmacistProfileData);
+      console.log(`Pharmacist profile for UID ${userId} created in Firestore.`);
+    } catch (error) {
+      console.error("Error saving pharmacist profile to Firestore:", error);
+      // Potentially roll back Firebase Auth user creation or mark user for cleanup
+      // For now, return an error to the client
+      return NextResponse.json({ message: 'User account created, but failed to save profile details. Please contact support.' }, { status: 500 });
+    }
+    
 
     return NextResponse.json({ 
-      message: "Pharmacist registration (simulated) successful! Your 1-month free trial has started.",
-      user: { 
+      message: "Pharmacist registration successful! Your 1-month free trial has started.",
+      user: { // Return some basic info, not the full profile or password
+        userId: userId,
         pharmacyName: pharmacyName,
         email: email
       } 
@@ -59,10 +113,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error("Error processing signup:", error);
-    let errorMessage = "An unexpected error occurred during signup.";
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-    return NextResponse.json({ message: "Failed to process signup.", error: errorMessage }, { status: 500 });
+    // Generic error for unexpected issues
+    return NextResponse.json({ message: "An unexpected error occurred during signup." }, { status: 500 });
   }
 }

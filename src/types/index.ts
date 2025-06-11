@@ -10,7 +10,7 @@ export interface Drug {
   storageConditions?: string;
   manufacturingDate?: string; // ISO string or Date
   listedDate?: string; // ISO string or Date
-  status?: 'Available' | 'Donated' | 'Expired'; // Removed 'Pending Prediction'
+  status?: 'Available' | 'Donated' | 'Expired';
   notes?: string;
 }
 
@@ -28,23 +28,23 @@ export interface Charity {
 }
 
 export interface PharmacistProfile {
-  id: string;
+  userId: string; // Firebase Auth User ID will be the primary identifier
   firstName: string;
   lastName: string;
   email: string; 
-  pharmacyName: string; 
+  pharmacyName: string; // This also serves as the username
   nigeriaPhoneNumber: string;
   pharmacyAddress: string;
   profilePictureUrl?: string;
   socialMediaLinks?: (string | undefined)[]; 
   websiteLink?: string;
-  subscriptionStatus: 'Trial Active' | 'Active' | 'Inactive' | 'Pending Payment' | 'Cancelled'; // Added 'Trial Active'
-  subscriptionTier: 'Monthly' | 'Yearly' | 'None' | 'N/A'; // Added 'N/A' for trial
+  subscriptionStatus: 'Trial Active' | 'Active' | 'Inactive' | 'Pending Payment' | 'Cancelled';
+  subscriptionTier: 'Monthly' | 'Yearly' | 'None' | 'N/A';
   subscriptionId?: string; 
-  nextBillingDate?: string; 
-  memberSince: string; 
-  trialEndDate?: string; // ISO string or Date
-  paymentLinks?: { // For reference, actual payment handled by Paystack links
+  nextBillingDate?: string; // ISO string or Date
+  memberSince: string; // ISO string or Date
+  trialEndDate: string; // ISO string or Date
+  paymentLinks?: {
     monthly: string;
     yearly: string;
   };
