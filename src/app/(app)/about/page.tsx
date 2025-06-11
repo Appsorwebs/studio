@@ -2,13 +2,16 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Info, HeartHandshake, Lightbulb, ShieldCheck } from "lucide-react";
 import Logo from "@/components/Logo";
+import Link from "next/link";
 
 export default function AboutPage() {
   return (
     <div className="container mx-auto py-8 space-y-12">
       <section className="text-center">
         <div className="inline-block mb-6">
-          <Logo />
+          <Link href="/dashboard">
+            <Logo />
+          </Link>
         </div>
         <h1 className="text-4xl font-bold mb-4">About Rxpiration Alert</h1>
         <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
