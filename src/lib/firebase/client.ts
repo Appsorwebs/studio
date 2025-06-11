@@ -17,6 +17,11 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
+// !!! DEBUGGING !!!: Log the config being used by the client
+console.log("Firebase Client Config being used:", firebaseConfig);
+// Ensure all NEXT_PUBLIC_ variables are actually populated. If any are undefined,
+// they are not being correctly passed from your .env.local file.
+
 // Initialize Firebase
 let app;
 if (!getApps().length) {
