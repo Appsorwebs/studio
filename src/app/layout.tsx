@@ -14,17 +14,23 @@ const SetInitialTheme = () => {
   const scriptContent = `
     (function() {
       var d=document.documentElement,c=d.classList;
-      var s; // stored theme
-      try{s=localStorage.getItem('theme')}catch(e){} // s can be 'light', 'dark', or null (for system)
-      if(s==='light'||s==='dark'){ // User has an explicit preference
-        c.remove(s==='light'?'dark':'light'); // ensure opposite class is removed
-        c.add(s); // add the explicit theme class
-      } else { // System preference or no preference stored (treat as system)
-        if(window.matchMedia('(prefers-color-scheme: dark)').matches){
+      var themePreference;
+      try { themePreference = localStorage.getItem('theme'); } catch(e) {}
+
+      if (themePreference === 'dark') {
+        c.add('dark');
+      } else if (themePreference === 'light') {
+        c.remove('dark'); // Explicitly light
+      } else if (themePreference === 'system') {
+        // If 'system', check system preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
           c.add('dark');
-        }else{
-          c.remove('dark');
+        } else {
+          c.remove('dark'); // System is light or doesn't support media query
         }
+      } else {
+        // No valid preference (null, empty, or garbage value), default to light
+        c.remove('dark');
       }
     })();
   `;
