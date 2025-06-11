@@ -1,10 +1,12 @@
 
+"use client"; // Make this a client component for calendar state
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/Logo';
 import SpinnerLogo from '@/components/SpinnerLogo';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { ArrowRight, PackageCheck, HandHeart, BarChartBig, Users, Pill } from 'lucide-react';
+import { ArrowRight, PackageCheck, HandHeart, BarChartBig, Users, Pill, CalendarDays } from 'lucide-react';
 import Image from 'next/image';
 import { AppFooter } from '@/components/layout/AppFooter';
 import { allMockDrugs } from '@/lib/mock-data';
@@ -12,9 +14,27 @@ import type { Drug } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format, parseISO } from 'date-fns';
+import { Calendar } from "@/components/ui/calendar";
+import { useState, useMemo } from "react";
 
 export default function LandingPage() {
   const featuredDrugs: Drug[] = allMockDrugs.filter(drug => drug.status === 'Available' || drug.status === 'Donated').slice(0, 3);
+
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date | undefined>(new Date());
+
+  const drugExpirationDates = useMemo(() => {
+    return allMockDrugs
+      .map(drug => drug.expirationDate ? parseISO(drug.expirationDate) : null)
+      .filter(Boolean) as Date[];
+  }, []);
+
+  const calendarModifiers = useMemo(() => ({
+    expiration: drugExpirationDates,
+  }), [drugExpirationDates]);
+
+  const calendarModifiersClassNames = {
+    expiration: 'bg-destructive/20 text-destructive-foreground rounded-full', // Style for expiration dates
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background font-body">
@@ -33,8 +53,9 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Hero Section */}
+      {/* Main Content */}
       <main className="flex-1">
+        {/* Hero Section */}
         <section className="py-16 md:py-24 lg:py-32 bg-gradient-to-br from-primary/10 via-background to-background">
           <div className="container mx-auto px-4 md:px-6 text-center">
             <div className="mb-8 inline-block p-2 rounded-lg">
@@ -55,6 +76,38 @@ export default function LandingPage() {
               <Button asChild size="lg" variant="outline" className="shadow-lg">
                 <Link href="#features">Learn More</Link>
               </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Interactive Calendar Section (Replaces "How it Works") */}
+        <section id="visualize-expirations" className="py-16 md:py-24 bg-muted/50">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="text-center mb-12">
+              <CalendarDays className="mx-auto h-12 w-12 text-primary mb-4" />
+              <h2 className="text-3xl md:text-4xl font-bold font-headline">
+                Visualize Your Expiration Timeline
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto mt-4">
+                Our interactive calendar helps you monitor upcoming drug expirations at a glance. Select dates and see mock expiration highlights based on inventory data.
+              </p>
+            </div>
+            <div className="flex justify-center">
+              <Card className="shadow-xl p-4 md:p-6">
+                <Calendar
+                  mode="single"
+                  selected={selectedCalendarDate}
+                  onSelect={setSelectedCalendarDate}
+                  modifiers={calendarModifiers}
+                  modifiersClassNames={calendarModifiersClassNames}
+                  className="rounded-md border"
+                />
+                {selectedCalendarDate && (
+                  <p className="mt-4 text-sm text-center text-muted-foreground">
+                    Selected: {format(selectedCalendarDate, "PPP")}
+                  </p>
+                )}
+              </Card>
             </div>
           </div>
         </section>
