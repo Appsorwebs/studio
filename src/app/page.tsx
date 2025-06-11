@@ -144,7 +144,7 @@ export default function LandingPage() {
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4">Intuitive Dashboard. Powerful Insights.</h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Visualize your data, track key metrics, and make informed decisions with our user-friendly interface that works.
+                Visualize your data, track key metrics, and make informed decisions with our user-friendly interface.
               </p>
             </div>
             <div className="relative">
@@ -156,7 +156,6 @@ export default function LandingPage() {
                 className="rounded-xl shadow-2xl mx-auto"
                 data-ai-hint="UI dashboard"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-xl"></div>
             </div>
           </div>
         </section>
