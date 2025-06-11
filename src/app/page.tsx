@@ -138,19 +138,6 @@ export default function LandingPage() {
           </div>
         </section>
         
-        {/* How it Works Section */}
-        <section className="py-16 md:py-24 bg-secondary/50">
-          <div className="container mx-auto px-4 md:px-6">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4">Intuitive Dashboard. Powerful Insights.</h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Visualize your data, track key metrics, and make informed decisions with our user-friendly interface.
-              </p>
-            </div>
-            {/* Image was here, now removed */}
-          </div>
-        </section>
-
         {/* Call to Action Section */}
         <section className="py-16 md:py-24 bg-primary/80 text-primary-foreground">
           <div className="container mx-auto px-4 md:px-6 text-center">
