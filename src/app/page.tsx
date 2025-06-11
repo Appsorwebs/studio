@@ -142,9 +142,9 @@ export default function LandingPage() {
         <section className="py-16 md:py-24 bg-secondary/50">
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4">Transforming Medication Management</h2>
+              <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4">Intuitive Dashboard. Powerful Insights.</h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Our platform simplifies complex processes, making drug lifecycle management intuitive and effective.
+                Visualize your data, track key metrics, and make informed decisions with our user-friendly interface that works.
               </p>
             </div>
             <div className="relative">
@@ -157,12 +157,6 @@ export default function LandingPage() {
                 data-ai-hint="UI dashboard"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-xl"></div>
-               <div className="absolute bottom-8 left-8 right-8 text-center md:text-left">
-                <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">Intuitive Dashboard. Powerful Insights.</h3>
-                <p className="text-md md:text-lg text-gray-200 max-w-xl">
-                  Visualize your data, track key metrics, and make informed decisions with our user-friendly interface that works.
-                </p>
-              </div>
             </div>
           </div>
         </section>
